@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+private.pem
+server.key
+credentials.json
+service-account.json
+
+# Build outputs
+dist/
+build/
+.next/
+coverage/
+.cache/
+.vite/
+.turbo/
+out/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Android / Gradle
+.gradle/
+android/app/build/
+android/.gradle/
+android/local.properties
+android/**/build/
+*.apk
+*.aab
+*.jks
+*.keystore
+.cxx/

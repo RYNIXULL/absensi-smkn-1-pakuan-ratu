@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  operator
+  guru
+  siswa
+
+  @@map("user_role")
+}
+
+enum AttendanceStatus {
+  hadir
+  terlambat
+  izin
+  sakit
+  alpa
+
+  @@map("attendance_status")
+}
+
+enum SessionStatus {
+  terjadwal
+  terbuka
+  ditutup
+
+  @@map("session_status")
+}
+
+enum RequestStatus {
+  menunggu
+  disetujui
+  ditolak
+
+  @@map("request_status")
+}
+
+enum LeaveType {
+  izin
+  sakit
+
+  @@map("leave_type")
+}
+
+model User {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role          UserRole
+  nama          String
+  nomor_induk   String   @unique
+  email         String?  @unique
+  password_hash String
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  devices               Device[]
+  class_members         ClassMember[]
+  schedules_taught      Schedule[]            @relation("TeacherSchedules")
+  sessions_opened       AttendanceSession[]   @relation("SessionOpener")
+  attendances           Attendance[]
+  leave_requests        LeaveRequest[]        @relation("StudentLeaveRequests")
+  leave_reviewed        LeaveRequest[]        @relation("LeaveReviewer")
+  attendance_challenges AttendanceChallenge[]
+  refresh_tokens        RefreshToken[]
+  audit_logs            AuditLog[]
+
+  @@map("users")
+}
+
+model Device {
+  id         String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String        @db.Uuid
+  user       User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  device_id  String
+  model      String?
+  fcm_token  String?
+  status     RequestStatus @default(menunggu)
+  is_active  Boolean       @default(false)
+  created_at DateTime      @default(now()) @db.Timestamptz(6)
+
+  attendances Attendance[]
+
+  @@unique([user_id, device_id])
+  @@map("devices")
+}
+
+model Class {
+  id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nama         String
+  tahun_ajaran String
+
+  members   ClassMember[]
+  schedules Schedule[]
+
+  @@map("classes")
+}
+
+model ClassMember {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  class_id String @db.Uuid
+  class    Class  @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  user_id  String @db.Uuid
+  user     User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([class_id, user_id])
+  @@map("class_members")
+}
+
+model Subject {
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nama String
+
+  schedules Schedule[]
+
+  @@map("subjects")
+}
+
+model Location {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nama      String
+  latitude  Decimal  @db.Decimal(9, 6)
+  longitude Decimal  @db.Decimal(9, 6)
+  radius_m  Int
+  is_active Boolean  @default(true)
+
+  schedules Schedule[]
+
+  @@map("locations")
+}
+
+model Schedule {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  class_id    String   @db.Uuid
+  class       Class    @relation(fields: [class_id], references: [id])
+  subject_id  String   @db.Uuid
+  subject     Subject  @relation(fields: [subject_id], references: [id])
+  teacher_id  String   @db.Uuid
+  teacher     User     @relation("TeacherSchedules", fields: [teacher_id], references: [id])
+  location_id String   @db.Uuid
+  location    Location @relation(fields: [location_id], references: [id])
+  day_of_week Int      @db.SmallInt
+  start_time  DateTime @db.Time(6)
+  end_time    DateTime @db.Time(6)
+
+  sessions AttendanceSession[]
+
+  @@index([class_id, day_of_week], map: "idx_schedules_class_day")
+  @@map("schedules")
+}
+
+model AttendanceSession {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  schedule_id String        @db.Uuid
+  schedule    Schedule      @relation(fields: [schedule_id], references: [id])
+  opened_by   String?       @db.Uuid
+  opener      User?         @relation("SessionOpener", fields: [opened_by], references: [id])
+  tanggal     DateTime      @db.Date
+  open_at     DateTime      @db.Timestamptz(6)
+  close_at    DateTime      @db.Timestamptz(6)
+  late_after  DateTime      @db.Timestamptz(6)
+  status      SessionStatus @default(terjadwal)
+
+  attendances           Attendance[]
+  leave_requests        LeaveRequest[]
+  attendance_challenges AttendanceChallenge[]
+
+  @@unique([schedule_id, tanggal])
+  @@map("attendance_sessions")
+}
+
+model Attendance {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id        String           @db.Uuid
+  session           AttendanceSession @relation(fields: [session_id], references: [id], onDelete: Cascade)
+  student_id        String           @db.Uuid
+  student           User             @relation(fields: [student_id], references: [id])
+  device_id         String?          @db.Uuid
+  device            Device?          @relation(fields: [device_id], references: [id])
+  status            AttendanceStatus
+  checkin_at        DateTime?        @db.Timestamptz(6)
+  latitude          Decimal?         @db.Decimal(9, 6)
+  longitude         Decimal?         @db.Decimal(9, 6)
+  accuracy_m        Float?           @db.Real
+  distance_m        Float?           @db.Real
+  selfie_key        String?
+  mock_detected     Boolean          @default(false)
+  integrity_verdict String?
+  source            String           @default("app")
+  catatan           String?
+
+  @@unique([session_id, student_id])
+  @@index([student_id, checkin_at], map: "idx_att_student_time")
+  @@map("attendances")
+}
+
+model LeaveRequest {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student_id     String        @db.Uuid
+  student        User          @relation("StudentLeaveRequests", fields: [student_id], references: [id])
+  session_id     String        @db.Uuid
+  session        AttendanceSession @relation(fields: [session_id], references: [id])
+  tipe           LeaveType
+  alasan         String
+  attachment_key String?
+  status         RequestStatus @default(menunggu)
+  reviewed_by    String?       @db.Uuid
+  reviewer       User?         @relation("LeaveReviewer", fields: [reviewed_by], references: [id])
+  reviewed_at    DateTime?     @db.Timestamptz(6)
+  created_at     DateTime      @default(now()) @db.Timestamptz(6)
+
+  @@map("leave_requests")
+}
+
+model AttendanceChallenge {
+  id         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String            @db.Uuid
+  user       User              @relation(fields: [user_id], references: [id])
+  session_id String            @db.Uuid
+  session    AttendanceSession @relation(fields: [session_id], references: [id])
+  nonce      String            @unique
+  expires_at DateTime          @db.Timestamptz(6)
+  used_at    DateTime?         @db.Timestamptz(6)
+
+  @@map("attendance_challenges")
+}
+
+model RefreshToken {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String    @db.Uuid
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  token_hash String
+  expires_at DateTime  @db.Timestamptz(6)
+  revoked_at DateTime? @db.Timestamptz(6)
+
+  @@map("refresh_tokens")
+}
+
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actor_id   String?  @db.Uuid
+  actor      User?    @relation(fields: [actor_id], references: [id])
+  action     String
+  entity     String
+  entity_id  String?  @db.Uuid
+  old_value  Json?
+  new_value  Json?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("audit_logs")
+}
