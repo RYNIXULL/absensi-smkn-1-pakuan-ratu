@@ -6,9 +6,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.absensi.app.ui.absen.AbsenScreen
+import com.absensi.app.ui.absen.AbsenViewModel
 import com.absensi.app.ui.auth.DevicePendingScreen
 import com.absensi.app.ui.auth.LoginScreen
 import com.absensi.app.ui.auth.LoginViewModel
+import com.absensi.app.ui.history.SiswaHistoryScreen
+import com.absensi.app.ui.history.SiswaHistoryViewModel
 import com.absensi.app.ui.operator.ClassesScreen
 import com.absensi.app.ui.operator.ClassesViewModel
 import com.absensi.app.ui.operator.LocationsScreen
@@ -21,6 +25,8 @@ import com.absensi.app.ui.operator.UsersScreen
 import com.absensi.app.ui.operator.UsersViewModel
 import com.absensi.app.ui.schedule.ScheduleScreen
 import com.absensi.app.ui.schedule.ScheduleViewModel
+import com.absensi.app.ui.sessions.SessionsScreen
+import com.absensi.app.ui.sessions.SessionsViewModel
 
 sealed class Screen(val route: String) {
     data object Login : Screen("login")
@@ -34,6 +40,12 @@ sealed class Screen(val route: String) {
     data object OperatorLocations : Screen("operator_locations")
     data object OperatorSchedules : Screen("operator_schedules")
     data object MySchedule : Screen("my_schedule")
+    data object SiswaHistory : Screen("siswa_history")
+    data object Sessions : Screen("sessions")
+
+    companion object {
+        const val ABSEN_ROUTE = "absen/{sessionId}"
+    }
 }
 
 @Composable
@@ -75,11 +87,19 @@ fun AppNavGraph(
             )
         }
 
-        // Siswa Home & Jadwal
+        // Siswa Home, Kartu Sesi Aktif, & Riwayat
         composable(Screen.SiswaHome.route) {
+            val siswaHomeViewModel: SiswaHomeViewModel = hiltViewModel()
             SiswaHomeScreen(
+                viewModel = siswaHomeViewModel,
                 onNavigateToSchedule = {
                     navController.navigate(Screen.MySchedule.route)
+                },
+                onNavigateToAbsen = { sessionId ->
+                    navController.navigate("absen/$sessionId")
+                },
+                onNavigateToHistory = {
+                    navController.navigate(Screen.SiswaHistory.route)
                 },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
@@ -89,11 +109,41 @@ fun AppNavGraph(
             )
         }
 
-        // Guru Home & Jadwal
+        // Layar Absensi Kamera & GPS (Siswa)
+        composable(Screen.ABSEN_ROUTE) {
+            val absenViewModel: AbsenViewModel = hiltViewModel()
+            AbsenScreen(
+                viewModel = absenViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onSuccessFinish = {
+                    navController.navigate(Screen.SiswaHome.route) {
+                        popUpTo(Screen.SiswaHome.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Layar Riwayat Kehadiran (Siswa)
+        composable(Screen.SiswaHistory.route) {
+            val historyViewModel: SiswaHistoryViewModel = hiltViewModel()
+            SiswaHistoryScreen(
+                viewModel = historyViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Guru Home
         composable(Screen.GuruHome.route) {
             GuruHomeScreen(
                 onNavigateToSchedule = {
                     navController.navigate(Screen.MySchedule.route)
+                },
+                onNavigateToSessions = {
+                    navController.navigate(Screen.Sessions.route)
                 },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
@@ -122,10 +172,22 @@ fun AppNavGraph(
                 onNavigateToSubjects = { navController.navigate(Screen.OperatorSubjects.route) },
                 onNavigateToLocations = { navController.navigate(Screen.OperatorLocations.route) },
                 onNavigateToSchedules = { navController.navigate(Screen.OperatorSchedules.route) },
+                onNavigateToSessions = { navController.navigate(Screen.Sessions.route) },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        // Kelola Sesi Absensi (Guru & Operator)
+        composable(Screen.Sessions.route) {
+            val sessionsViewModel: SessionsViewModel = hiltViewModel()
+            SessionsScreen(
+                viewModel = sessionsViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

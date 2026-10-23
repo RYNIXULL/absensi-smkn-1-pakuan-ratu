@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.MeetingRoom
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -50,6 +51,7 @@ fun OperatorHomeScreen(
     onNavigateToSubjects: () -> Unit,
     onNavigateToLocations: () -> Unit,
     onNavigateToSchedules: () -> Unit,
+    onNavigateToSessions: () -> Unit,
     onLogout: () -> Unit
 ) {
     Box(
@@ -158,6 +160,17 @@ fun OperatorHomeScreen(
                     icon = Icons.Default.CalendarMonth,
                     iconTint = Color(0xFFF472B6),
                     onClick = onNavigateToSchedules
+                )
+            }
+
+            // 6. Sesi Absensi
+            item {
+                OperatorMenuCard(
+                    title = "Sesi Absensi",
+                    subtitle = "Buka/tutup sesi dan pantau kehadiran siswa",
+                    icon = Icons.Default.MeetingRoom,
+                    iconTint = Color(0xFF10B981),
+                    onClick = onNavigateToSessions
                 )
             }
 

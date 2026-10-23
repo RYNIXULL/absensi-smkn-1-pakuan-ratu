@@ -5,14 +5,12 @@ import { SchedulesController } from './schedules.controller';
 
 export const schedulesRouter = Router();
 
-schedulesRouter.use(authenticate);
-
 // Endpoint pribadi guru & siswa
-schedulesRouter.get('/me/schedules', requireRole('guru', 'siswa', 'operator'), SchedulesController.getMe);
+schedulesRouter.get('/me/schedules', authenticate, requireRole('guru', 'siswa', 'operator'), SchedulesController.getMe);
 
 // Master schedules CRUD (operator dan guru bila diizinkan di controller)
-schedulesRouter.get('/schedules', requireRole('operator', 'guru'), SchedulesController.list);
-schedulesRouter.post('/schedules', requireRole('operator', 'guru'), SchedulesController.create);
-schedulesRouter.get('/schedules/:id', requireRole('operator', 'guru'), SchedulesController.getById);
-schedulesRouter.patch('/schedules/:id', requireRole('operator', 'guru'), SchedulesController.update);
-schedulesRouter.delete('/schedules/:id', requireRole('operator', 'guru'), SchedulesController.delete);
+schedulesRouter.get('/schedules', authenticate, requireRole('operator', 'guru'), SchedulesController.list);
+schedulesRouter.post('/schedules', authenticate, requireRole('operator', 'guru'), SchedulesController.create);
+schedulesRouter.get('/schedules/:id', authenticate, requireRole('operator', 'guru'), SchedulesController.getById);
+schedulesRouter.patch('/schedules/:id', authenticate, requireRole('operator', 'guru'), SchedulesController.update);
+schedulesRouter.delete('/schedules/:id', authenticate, requireRole('operator', 'guru'), SchedulesController.delete);

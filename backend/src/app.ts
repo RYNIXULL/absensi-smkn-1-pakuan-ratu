@@ -11,6 +11,9 @@ import { subjectsRouter } from './modules/subjects/subjects.routes';
 import { locationsRouter } from './modules/locations/locations.routes';
 import { schedulesRouter } from './modules/schedules/schedules.routes';
 import { settingsRouter } from './modules/settings/settings.routes';
+import sessionsRouter from './modules/sessions/sessions.routes';
+import attendanceRouter, { myAttendanceRouter } from './modules/attendance/attendance.routes';
+import filesRouter from './modules/files/files.routes';
 
 export const app: Application = express();
 
@@ -34,5 +37,11 @@ app.use('/api/v1/subjects', subjectsRouter);
 app.use('/api/v1/locations', locationsRouter);
 app.use('/api/v1', schedulesRouter);
 app.use('/api/v1/settings', settingsRouter);
+
+// Sesi dan Absensi (Fase F3)
+app.use('/api/v1/sessions', sessionsRouter);
+app.use('/api/v1/attendances', attendanceRouter);
+app.use('/api/v1/me/attendances', myAttendanceRouter);
+app.use('/api/v1/files', filesRouter);
 
 app.use(errorHandler);

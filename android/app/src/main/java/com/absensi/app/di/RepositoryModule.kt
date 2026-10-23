@@ -19,4 +19,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindMasterDataRepository(impl: com.absensi.app.data.repository.MasterDataRepositoryImpl): com.absensi.app.data.repository.MasterDataRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAttendanceRepository(impl: com.absensi.app.data.repository.AttendanceRepositoryImpl): com.absensi.app.data.repository.AttendanceRepository
 }

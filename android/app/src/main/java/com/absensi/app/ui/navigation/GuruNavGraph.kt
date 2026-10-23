@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.MeetingRoom
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun GuruHomeScreen(
     onNavigateToSchedule: () -> Unit,
+    onNavigateToSessions: () -> Unit,
     onLogout: () -> Unit
 ) {
     Box(
@@ -143,6 +145,68 @@ fun GuruHomeScreen(
                             Spacer(modifier = Modifier.height(3.dp))
                             Text(
                                 text = "Lihat jam pelajaran, kelas, dan lokasi mengajar",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF94A3B8),
+                                fontSize = 12.sp
+                            )
+                        }
+
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                            contentDescription = null,
+                            tint = Color(0xFF64748B),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+
+            // Kelola Sesi Absensi Card
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(18.dp))
+                        .clickable(onClick = onNavigateToSessions),
+                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(18.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF10B981).copy(alpha = 0.2f))
+                                .border(1.dp, Color(0xFF10B981).copy(alpha = 0.4f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MeetingRoom,
+                                contentDescription = null,
+                                tint = Color(0xFF10B981),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Kelola Sesi Absensi",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text(
+                                text = "Buka sesi kehadiran manual, tutup sesi, atau pantau presensi siswa",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color(0xFF94A3B8),
                                 fontSize = 12.sp

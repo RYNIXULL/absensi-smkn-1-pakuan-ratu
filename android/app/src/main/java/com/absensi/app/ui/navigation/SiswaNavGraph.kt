@@ -21,14 +21,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,12 +43,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.absensi.app.data.remote.dto.SessionDto
 
 @Composable
 fun SiswaHomeScreen(
+    viewModel: SiswaHomeViewModel = hiltViewModel(),
     onNavigateToSchedule: () -> Unit,
+    onNavigateToAbsen: (sessionId: String) -> Unit,
+    onNavigateToHistory: () -> Unit,
     onLogout: () -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -82,6 +95,33 @@ fun SiswaHomeScreen(
                             color = Color(0xFF94A3B8),
                             fontSize = 13.sp
                         )
+                    }
+                }
+            }
+
+            // Active Session Card (Kartu Sesi Aktif)
+            item {
+                when (val state = uiState) {
+                    is SiswaHomeUiState.Loading -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(80.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = Color(0xFF60A5FA), modifier = Modifier.size(28.dp))
+                        }
+                    }
+                    is SiswaHomeUiState.Success -> {
+                        if (state.activeSession != null) {
+                            ActiveSessionCard(
+                                session = state.activeSession,
+                                onAbsenClick = { onNavigateToAbsen(state.activeSession.id) }
+                            )
+                        }
+                    }
+                    is SiswaHomeUiState.Error -> {
+                        // Silently fallback without disrupting the rest of home
                     }
                 }
             }
@@ -159,6 +199,68 @@ fun SiswaHomeScreen(
                 }
             }
 
+            // Riwayat Kehadiran Card
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(18.dp))
+                        .clickable(onClick = onNavigateToHistory),
+                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(18.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF60A5FA).copy(alpha = 0.2f))
+                                .border(1.dp, Color(0xFF60A5FA).copy(alpha = 0.4f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.History,
+                                contentDescription = null,
+                                tint = Color(0xFF60A5FA),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Riwayat Presensi",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text(
+                                text = "Daftar kehadiran terdahulu, jam check-in, dan status",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF94A3B8),
+                                fontSize = 12.sp
+                            )
+                        }
+
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                            contentDescription = null,
+                            tint = Color(0xFF64748B),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+
             // Logout Button
             item {
                 Spacer(modifier = Modifier.height(24.dp))
@@ -180,6 +282,105 @@ fun SiswaHomeScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(text = "Keluar dari Akun", color = Color.White, fontWeight = FontWeight.SemiBold)
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActiveSessionCard(
+    session: SessionDto,
+    onAbsenClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .border(2.dp, Color(0xFF10B981).copy(alpha = 0.6f), RoundedCornerShape(20.dp)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF10B981).copy(alpha = 0.12f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF10B981).copy(alpha = 0.25f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        tint = Color(0xFF10B981),
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "SESI PRESENSI AKTIF",
+                        color = Color(0xFF34D399),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = session.schedule?.subject?.name ?: "Mata Pelajaran",
+                        color = Color.White,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFF10B981).copy(alpha = 0.2f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "TERBUKA",
+                        color = Color(0xFF34D399),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = "Kelas: ${session.schedule?.classInfo?.name ?: "-"} • Guru: ${session.schedule?.teacher?.nama ?: "-"}",
+                color = Color(0xFFCBD5E1),
+                fontSize = 12.sp
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = onAbsenClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981)),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Absen Sekarang",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
                 }
             }
         }
