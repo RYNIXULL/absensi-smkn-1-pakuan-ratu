@@ -35,6 +35,13 @@ object ErrorMapper {
             "TOO_MANY_ATTEMPTS" -> "Terlalu banyak percobaan login. Silakan tunggu 15 menit."
             "UNAUTHORIZED" -> "Sesi telah berakhir. Silakan login kembali."
             "FORBIDDEN" -> "Akses ditolak untuk peran akun Anda."
+            "IN_USE" -> "Data tidak dapat dihapus karena masih digunakan atau terhubung ke data lain."
+            "SCHEDULE_CONFLICT" -> "Terdapat bentrok jadwal guru pada hari dan jam yang beririsan."
+            "INVALID_TEACHER_ROLE" -> "Pengguna yang dipilih bukan seorang guru."
+            "INACTIVE_LOCATION" -> "Lokasi yang dipilih berstatus tidak aktif."
+            "DUPLICATE_MEMBER" -> "Pengguna sudah menjadi anggota kelas ini."
+            "INVALID_MEMBER_ROLE" -> "Anggota kelas harus berperan sebagai siswa atau guru."
+            "VALIDATION_ERROR" -> fallbackMessage.ifBlank { "Format data yang dimasukkan tidak valid." }
             else -> fallbackMessage.ifBlank { "Terjadi kesalahan pada sistem." }
         }
     }
