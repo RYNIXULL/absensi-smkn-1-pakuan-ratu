@@ -65,6 +65,47 @@ export class UsersController {
       next(error);
     }
   }
+
+  async getImportTemplate(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const buffer = await usersService.generateImportTemplate();
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="template_impor_pengguna.xlsx"');
+      res.status(200).send(buffer);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async importUsers(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new AppError('UNAUTHORIZED', 'Autentikasi diperlukan', 401);
+      }
+      if (!req.file || !req.file.buffer) {
+        throw new AppError('FILE_REQUIRED', 'File Excel (.xlsx) wajib diunggah', 400);
+      }
+      const result = await usersService.importUsers(req.file.buffer, req.user.id);
+
+      if (
+        req.query.format === 'excel' ||
+        req.headers.accept?.includes('application/vnd.openxmlformats-officedocument')
+      ) {
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename="hasil_impor_pengguna.xlsx"');
+        res.status(200).send(result.excelBuffer);
+        return;
+      }
+
+      res.status(200).json({
+        summary: result.summary,
+        rows: result.rows,
+        excel_base64: result.excelBuffer.toString('base64'),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const usersController = new UsersController();

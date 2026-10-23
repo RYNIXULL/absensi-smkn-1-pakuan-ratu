@@ -6,6 +6,11 @@ import { errorHandler } from './middleware/error';
 import { authRouter } from './modules/auth/auth.routes';
 import { devicesRouter } from './modules/devices/devices.routes';
 import { usersRouter } from './modules/users/users.routes';
+import { classesRouter } from './modules/classes/classes.routes';
+import { subjectsRouter } from './modules/subjects/subjects.routes';
+import { locationsRouter } from './modules/locations/locations.routes';
+import { schedulesRouter } from './modules/schedules/schedules.routes';
+import { settingsRouter } from './modules/settings/settings.routes';
 
 export const app: Application = express();
 
@@ -24,6 +29,10 @@ app.get('/api/v1/health', (_req: Request, res: Response) => {
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/devices', devicesRouter);
 app.use('/api/v1', usersRouter);
+app.use('/api/v1/classes', classesRouter);
+app.use('/api/v1/subjects', subjectsRouter);
+app.use('/api/v1/locations', locationsRouter);
+app.use('/api/v1', schedulesRouter);
+app.use('/api/v1/settings', settingsRouter);
 
 app.use(errorHandler);
-
