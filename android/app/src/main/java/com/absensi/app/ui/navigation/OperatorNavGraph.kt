@@ -26,6 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.MeetingRoom
+import androidx.compose.material.icons.automirrored.filled.FactCheck
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -52,6 +53,7 @@ fun OperatorHomeScreen(
     onNavigateToLocations: () -> Unit,
     onNavigateToSchedules: () -> Unit,
     onNavigateToSessions: () -> Unit,
+    onNavigateToLeaveApproval: () -> Unit,
     onLogout: () -> Unit
 ) {
     Box(
@@ -171,6 +173,17 @@ fun OperatorHomeScreen(
                     icon = Icons.Default.MeetingRoom,
                     iconTint = Color(0xFF10B981),
                     onClick = onNavigateToSessions
+                )
+            }
+
+            // 7. Persetujuan Izin Siswa
+            item {
+                OperatorMenuCard(
+                    title = "Persetujuan Izin Siswa",
+                    subtitle = "Tinjau dan verifikasi permohonan izin seluruh siswa",
+                    icon = Icons.AutoMirrored.Filled.FactCheck,
+                    iconTint = Color(0xFFA78BFA),
+                    onClick = onNavigateToLeaveApproval
                 )
             }
 

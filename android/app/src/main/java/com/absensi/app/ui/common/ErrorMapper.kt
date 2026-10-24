@@ -51,6 +51,12 @@ object ErrorMapper {
             "ALREADY_CHECKED_IN" -> "Anda sudah melakukan absensi pada sesi ini."
             "INVALID_SELFIE" -> "Foto selfie tidak valid atau melebihi 2 MB. Ambil swafoto kembali."
             "INTEGRITY_FAILED" -> "Integritas perangkat atau aplikasi tidak memenuhi syarat."
+            "LEAVE_BACKDATE_EXCEEDED" -> "Pengajuan izin tidak boleh melewati batas maksimal (maksimal 3 hari ke belakang)."
+            "LEAVE_EXISTS" -> "Anda sudah memiliki pengajuan izin yang sedang diproses untuk sesi ini."
+            "ALREADY_REVIEWED" -> "Pengajuan izin ini sudah ditinjau sebelumnya dan tidak dapat diubah lagi."
+            "INVALID_FILE_TYPE" -> "Format berkas lampiran tidak didukung. Harap unggah berkas JPEG, PNG, WEBP, atau PDF."
+            "FILE_TOO_LARGE" -> "Ukuran berkas lampiran melebihi batas maksimal 5 MB."
+            "ATTACHMENT_NOT_FOUND" -> "Berkas lampiran tidak ditemukan di penyimpanan."
             "VALIDATION_ERROR" -> fallbackMessage.ifBlank { "Format data yang dimasukkan tidak valid." }
             else -> fallbackMessage.ifBlank { "Terjadi kesalahan pada sistem." }
         }

@@ -8,6 +8,8 @@ import {
   createUtcFromJakartaTime,
 } from '../../lib/dateUtils';
 import { DEFAULT_LATE_AFTER_MIN, DEFAULT_OPEN_BEFORE_MIN } from '../../jobs/sessionManager';
+import { processAutoAlpa } from '../../jobs/autoAlpa';
+import { logger } from '../../lib/logger';
 
 export class SessionsService {
   /**
@@ -190,6 +192,14 @@ export class SessionsService {
         new_value: { status: SessionStatus.ditutup },
       },
     });
+
+    // Reconcile auto-alpa and approved leave for students in this closed session
+    try {
+      await processAutoAlpa(sessionId);
+    } catch (err) {
+      // Log and continue, do not fail the close response
+      logger.error({ err }, 'Error running auto-alpa for manually closed session');
+    }
 
     return updated;
   }

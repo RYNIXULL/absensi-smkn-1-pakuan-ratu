@@ -3,6 +3,7 @@ import { prisma } from '../lib/prisma';
 import { logger } from '../lib/logger';
 import { getJakartaDateInfo, parseTimeToMinutes, createUtcFromJakartaTime } from '../lib/dateUtils';
 import { SessionStatus } from '@prisma/client';
+import { processAutoAlpa } from './autoAlpa';
 
 export const DEFAULT_OPEN_BEFORE_MIN = 15;
 export const DEFAULT_LATE_AFTER_MIN = 15;
@@ -106,6 +107,15 @@ export async function processSessionLifecycle(currentDate = new Date()): Promise
       status: SessionStatus.ditutup,
     },
   });
+
+  // Reconcile auto-alpa for newly closed sessions
+  if (closedResult.count > 0) {
+    try {
+      await processAutoAlpa();
+    } catch (err) {
+      logger.error({ err }, 'Error running auto-alpa reconciliation during session lifecycle');
+    }
+  }
 
   return {
     createdSessions,

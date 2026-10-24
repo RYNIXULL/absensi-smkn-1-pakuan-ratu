@@ -14,6 +14,7 @@ import { settingsRouter } from './modules/settings/settings.routes';
 import sessionsRouter from './modules/sessions/sessions.routes';
 import attendanceRouter, { myAttendanceRouter } from './modules/attendance/attendance.routes';
 import filesRouter from './modules/files/files.routes';
+import leaveRouter from './modules/leave/leave.routes';
 
 export const app: Application = express();
 
@@ -38,10 +39,13 @@ app.use('/api/v1/locations', locationsRouter);
 app.use('/api/v1', schedulesRouter);
 app.use('/api/v1/settings', settingsRouter);
 
-// Sesi dan Absensi (Fase F3)
+// Sesi dan Absensi (Fase F3 & F4)
 app.use('/api/v1/sessions', sessionsRouter);
 app.use('/api/v1/attendances', attendanceRouter);
 app.use('/api/v1/me/attendances', myAttendanceRouter);
 app.use('/api/v1/files', filesRouter);
+
+// Izin dan Sakit (Fase F5)
+app.use('/api/v1/leave-requests', leaveRouter);
 
 app.use(errorHandler);

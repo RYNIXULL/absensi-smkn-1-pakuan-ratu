@@ -81,4 +81,10 @@ object AppModule {
     fun provideAttendanceApi(retrofit: Retrofit): com.absensi.app.data.remote.AttendanceApi {
         return retrofit.create(com.absensi.app.data.remote.AttendanceApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideLeaveApi(retrofit: Retrofit): com.absensi.app.data.remote.LeaveApi {
+        return retrofit.create(com.absensi.app.data.remote.LeaveApi::class.java)
+    }
 }

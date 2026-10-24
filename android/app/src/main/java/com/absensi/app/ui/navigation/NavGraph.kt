@@ -27,6 +27,10 @@ import com.absensi.app.ui.schedule.ScheduleScreen
 import com.absensi.app.ui.schedule.ScheduleViewModel
 import com.absensi.app.ui.sessions.SessionsScreen
 import com.absensi.app.ui.sessions.SessionsViewModel
+import com.absensi.app.ui.leave.SiswaLeaveScreen
+import com.absensi.app.ui.leave.SiswaLeaveViewModel
+import com.absensi.app.ui.leave.LeaveApprovalScreen
+import com.absensi.app.ui.leave.LeaveApprovalViewModel
 
 sealed class Screen(val route: String) {
     data object Login : Screen("login")
@@ -41,6 +45,8 @@ sealed class Screen(val route: String) {
     data object OperatorSchedules : Screen("operator_schedules")
     data object MySchedule : Screen("my_schedule")
     data object SiswaHistory : Screen("siswa_history")
+    data object SiswaLeave : Screen("siswa_leave")
+    data object LeaveApproval : Screen("leave_approval")
     data object Sessions : Screen("sessions")
 
     companion object {
@@ -101,6 +107,9 @@ fun AppNavGraph(
                 onNavigateToHistory = {
                     navController.navigate(Screen.SiswaHistory.route)
                 },
+                onNavigateToLeave = {
+                    navController.navigate(Screen.SiswaLeave.route)
+                },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
@@ -136,6 +145,17 @@ fun AppNavGraph(
             )
         }
 
+        // Layar Pengajuan Izin & Sakit (Siswa)
+        composable(Screen.SiswaLeave.route) {
+            val leaveViewModel: SiswaLeaveViewModel = hiltViewModel()
+            SiswaLeaveScreen(
+                viewModel = leaveViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
         // Guru Home
         composable(Screen.GuruHome.route) {
             GuruHomeScreen(
@@ -144,6 +164,9 @@ fun AppNavGraph(
                 },
                 onNavigateToSessions = {
                     navController.navigate(Screen.Sessions.route)
+                },
+                onNavigateToLeaveApproval = {
+                    navController.navigate(Screen.LeaveApproval.route)
                 },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
@@ -173,10 +196,22 @@ fun AppNavGraph(
                 onNavigateToLocations = { navController.navigate(Screen.OperatorLocations.route) },
                 onNavigateToSchedules = { navController.navigate(Screen.OperatorSchedules.route) },
                 onNavigateToSessions = { navController.navigate(Screen.Sessions.route) },
+                onNavigateToLeaveApproval = { navController.navigate(Screen.LeaveApproval.route) },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        // Persetujuan Izin Siswa (Guru & Operator)
+        composable(Screen.LeaveApproval.route) {
+            val approvalViewModel: LeaveApprovalViewModel = hiltViewModel()
+            LeaveApprovalScreen(
+                viewModel = approvalViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
