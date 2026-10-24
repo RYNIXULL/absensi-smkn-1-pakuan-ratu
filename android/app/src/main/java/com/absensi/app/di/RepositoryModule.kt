@@ -27,4 +27,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindLeaveRepository(impl: com.absensi.app.data.repository.LeaveRepositoryImpl): com.absensi.app.data.repository.LeaveRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindExportRepository(impl: com.absensi.app.data.repository.ExportRepositoryImpl): com.absensi.app.data.repository.ExportRepository
 }

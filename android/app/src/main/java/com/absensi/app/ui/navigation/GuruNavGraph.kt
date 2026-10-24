@@ -40,12 +40,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import androidx.compose.material.icons.automirrored.filled.FactCheck
+import androidx.compose.material.icons.filled.Assessment
 
 @Composable
 fun GuruHomeScreen(
     onNavigateToSchedule: () -> Unit,
     onNavigateToSessions: () -> Unit,
     onNavigateToLeaveApproval: () -> Unit,
+    onNavigateToRekap: () -> Unit,
     onLogout: () -> Unit
 ) {
     Box(
@@ -272,6 +274,68 @@ fun GuruHomeScreen(
                             Spacer(modifier = Modifier.height(3.dp))
                             Text(
                                 text = "Tinjau dan setujui atau tolak permohonan izin/sakit siswa di kelas Anda",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF94A3B8),
+                                fontSize = 12.sp
+                            )
+                        }
+
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                            contentDescription = null,
+                            tint = Color(0xFF64748B),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+
+            // Rekapitulasi Presensi & Ekspor Excel Card
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(18.dp))
+                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(18.dp))
+                        .clickable(onClick = onNavigateToRekap),
+                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(18.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF0284C7).copy(alpha = 0.2f))
+                                .border(1.dp, Color(0xFF0284C7).copy(alpha = 0.4f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Assessment,
+                                contentDescription = null,
+                                tint = Color(0xFF38BDF8),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Rekapitulasi & Ekspor Excel",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text(
+                                text = "Filter rekapitulasi kehadiran kelas dan unduh laporan Excel (.xlsx)",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color(0xFF94A3B8),
                                 fontSize = 12.sp

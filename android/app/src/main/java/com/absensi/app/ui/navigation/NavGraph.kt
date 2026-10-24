@@ -31,6 +31,8 @@ import com.absensi.app.ui.leave.SiswaLeaveScreen
 import com.absensi.app.ui.leave.SiswaLeaveViewModel
 import com.absensi.app.ui.leave.LeaveApprovalScreen
 import com.absensi.app.ui.leave.LeaveApprovalViewModel
+import com.absensi.app.ui.rekap.RekapScreen
+import com.absensi.app.ui.rekap.RekapViewModel
 
 sealed class Screen(val route: String) {
     data object Login : Screen("login")
@@ -47,6 +49,7 @@ sealed class Screen(val route: String) {
     data object SiswaHistory : Screen("siswa_history")
     data object SiswaLeave : Screen("siswa_leave")
     data object LeaveApproval : Screen("leave_approval")
+    data object RekapExport : Screen("rekap_export")
     data object Sessions : Screen("sessions")
 
     companion object {
@@ -168,6 +171,9 @@ fun AppNavGraph(
                 onNavigateToLeaveApproval = {
                     navController.navigate(Screen.LeaveApproval.route)
                 },
+                onNavigateToRekap = {
+                    navController.navigate(Screen.RekapExport.route)
+                },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
@@ -197,6 +203,7 @@ fun AppNavGraph(
                 onNavigateToSchedules = { navController.navigate(Screen.OperatorSchedules.route) },
                 onNavigateToSessions = { navController.navigate(Screen.Sessions.route) },
                 onNavigateToLeaveApproval = { navController.navigate(Screen.LeaveApproval.route) },
+                onNavigateToRekap = { navController.navigate(Screen.RekapExport.route) },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
@@ -210,6 +217,17 @@ fun AppNavGraph(
             val approvalViewModel: LeaveApprovalViewModel = hiltViewModel()
             LeaveApprovalScreen(
                 viewModel = approvalViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Rekapitulasi Presensi & Ekspor Excel (Guru & Operator)
+        composable(Screen.RekapExport.route) {
+            val rekapViewModel: RekapViewModel = hiltViewModel()
+            RekapScreen(
+                viewModel = rekapViewModel,
                 onNavigateBack = {
                     navController.popBackStack()
                 }

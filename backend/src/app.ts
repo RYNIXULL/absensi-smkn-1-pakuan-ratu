@@ -15,6 +15,7 @@ import sessionsRouter from './modules/sessions/sessions.routes';
 import attendanceRouter, { myAttendanceRouter } from './modules/attendance/attendance.routes';
 import filesRouter from './modules/files/files.routes';
 import leaveRouter from './modules/leave/leave.routes';
+import { exportsRouter } from './modules/exports/exports.routes';
 
 export const app: Application = express();
 
@@ -47,5 +48,8 @@ app.use('/api/v1/files', filesRouter);
 
 // Izin dan Sakit (Fase F5)
 app.use('/api/v1/leave-requests', leaveRouter);
+
+// Ekspor Rekap Excel (Fase F6)
+app.use('/api/v1/exports', exportsRouter);
 
 app.use(errorHandler);

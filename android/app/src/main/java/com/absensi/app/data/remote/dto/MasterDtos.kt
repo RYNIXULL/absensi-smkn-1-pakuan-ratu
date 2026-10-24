@@ -91,7 +91,7 @@ data class ClassCountDto(
 data class ClassDto(
     val id: String,
     val nama: String,
-    val tahun_ajaran: String,
+    val tahun_ajaran: String = "",
     val _count: ClassCountDto? = null
 )
 

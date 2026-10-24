@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -54,6 +55,7 @@ fun OperatorHomeScreen(
     onNavigateToSchedules: () -> Unit,
     onNavigateToSessions: () -> Unit,
     onNavigateToLeaveApproval: () -> Unit,
+    onNavigateToRekap: () -> Unit,
     onLogout: () -> Unit
 ) {
     Box(
@@ -184,6 +186,17 @@ fun OperatorHomeScreen(
                     icon = Icons.AutoMirrored.Filled.FactCheck,
                     iconTint = Color(0xFFA78BFA),
                     onClick = onNavigateToLeaveApproval
+                )
+            }
+
+            // 8. Rekapitulasi & Ekspor Excel
+            item {
+                OperatorMenuCard(
+                    title = "Rekapitulasi & Ekspor Excel",
+                    subtitle = "Laporan kehadiran per periode, kelas & unduh .xlsx",
+                    icon = Icons.Default.Assessment,
+                    iconTint = Color(0xFF0284C7),
+                    onClick = onNavigateToRekap
                 )
             }
 
