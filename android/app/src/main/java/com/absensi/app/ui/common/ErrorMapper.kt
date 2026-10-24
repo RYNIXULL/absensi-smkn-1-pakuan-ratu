@@ -80,6 +80,7 @@ object ErrorMapper {
                         "OUT_OF_RADIUS" -> "Dekatilah lokasi sekolah dan pastikan berada dalam radius presensi sebelum menekan tombol absen."
                         "ALREADY_CHECKED_IN" -> "Anda tidak perlu melakukan absen dua kali pada sesi yang sama."
                         "INVALID_SELFIE" -> "Pastikan wajah Anda terlihat jelas dengan pencahayaan yang cukup."
+                        "INTEGRITY_FAILED" -> "Pastikan perangkat menggunakan firmware resmi, tidak di-root, dan Google Play Store terpasang."
                         else -> "Silakan coba beberapa saat lagi."
                     }
                     return DetailedError(code, message, suggestion)

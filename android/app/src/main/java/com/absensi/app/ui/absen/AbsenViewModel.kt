@@ -8,6 +8,9 @@ import com.absensi.app.data.local.AuthPreferences
 import com.absensi.app.data.local.DeviceIdProvider
 import com.absensi.app.data.remote.dto.SessionDto
 import com.absensi.app.data.repository.AttendanceRepository
+import com.absensi.app.security.IntegrityManager
+import com.absensi.app.security.MockLocationChecker
+import com.absensi.app.security.RootChecker
 import com.absensi.app.ui.common.ErrorMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +25,9 @@ class AbsenViewModel @Inject constructor(
     private val attendanceRepository: AttendanceRepository,
     private val locationService: LocationService,
     private val imageProcessor: ImageProcessor,
+    private val mockLocationChecker: MockLocationChecker,
+    private val rootChecker: RootChecker,
+    private val integrityManager: IntegrityManager,
     private val authPreferences: AuthPreferences,
     private val deviceIdProvider: DeviceIdProvider,
     savedStateHandle: SavedStateHandle
@@ -32,12 +38,6 @@ class AbsenViewModel @Inject constructor(
 
     private var currentSessionId: String? = savedStateHandle.get<String>("sessionId")
     private var cachedSession: SessionDto? = null
-
-    init {
-        currentSessionId?.let {
-            // Initial check triggered by UI lifecycle after permission checking
-        }
-    }
 
     fun setSession(session: SessionDto) {
         this.cachedSession = session
@@ -89,7 +89,17 @@ class AbsenViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = AbsenState.CheckingPermissions
 
-            // 1. Get or find session
+            // 1. Root check (anti-tamper)
+            if (rootChecker.isDeviceRooted()) {
+                _state.value = AbsenState.Error(
+                    code = "ROOT_DETECTED",
+                    message = "Perangkat Anda terdeteksi telah dimodifikasi (Root).",
+                    suggestion = "Demi keamanan dan integritas presensi, absensi dari perangkat root diblokir."
+                )
+                return@launch
+            }
+
+            // 2. Get or find session
             var session = cachedSession
             if (session == null) {
                 val sessionsResult = attendanceRepository.getSessions(status = "terbuka")
@@ -105,7 +115,7 @@ class AbsenViewModel @Inject constructor(
                 cachedSession = session
             }
 
-            // 2. Request challenge nonce
+            // 3. Request challenge nonce
             val challengeResult = attendanceRepository.createChallenge(sessionId)
             val challenge = challengeResult.getOrElse { throwable ->
                 val error = ErrorMapper.parseDetailedError(throwable)
@@ -117,7 +127,7 @@ class AbsenViewModel @Inject constructor(
                 return@launch
             }
 
-            // 3. Acquire GPS location
+            // 4. Acquire GPS location
             val location = locationService.getCurrentLocation()
             if (location == null) {
                 _state.value = AbsenState.Error(
@@ -128,12 +138,24 @@ class AbsenViewModel @Inject constructor(
                 return@launch
             }
 
-            // 4. Block if mock location detected
-            if (location.isMock) {
+            // 5. Mock location check
+            val mockCheck = mockLocationChecker.checkMockEnvironment()
+            val isMock = mockLocationChecker.isMockLocation(location) || mockCheck.isMockDetected
+            if (isMock) {
                 _state.value = AbsenState.Error(
                     code = "MOCK_LOCATION",
                     message = "Lokasi tiruan (Fake GPS) terdeteksi dan dilarang keras.",
-                    suggestion = "Nonaktifkan fitur Mock Location di Opsi Pengembang ponsel Anda."
+                    suggestion = "Nonaktifkan fitur Mock Location di Opsi Pengembang ponsel Anda dan hapus aplikasi lokasi palsu."
+                )
+                return@launch
+            }
+
+            // 6. Accuracy check (Batas akurasi <= 50m)
+            if (location.accuracy > 50f) {
+                _state.value = AbsenState.Error(
+                    code = "LOW_ACCURACY",
+                    message = "Akurasi sinyal GPS terlalu rendah (±${location.accuracy.toInt()} meter, batas maksimal 50 meter).",
+                    suggestion = "Pindahlah ke luar ruangan atau dekat jendela agar akurasi GPS meningkat, lalu tekan Coba Lagi."
                 )
                 return@launch
             }
@@ -144,7 +166,7 @@ class AbsenViewModel @Inject constructor(
                 lat = location.latitude,
                 lng = location.longitude,
                 accuracy = location.accuracy,
-                isMock = location.isMock
+                isMock = false
             )
         }
     }
@@ -160,11 +182,30 @@ class AbsenViewModel @Inject constructor(
         val accuracy = currentState.accuracy
         val isMock = currentState.isMock
 
+        // Pre-submission safety checks
+        if (rootChecker.isDeviceRooted()) {
+            _state.value = AbsenState.Error(
+                code = "ROOT_DETECTED",
+                message = "Perangkat Anda terdeteksi telah dimodifikasi (Root).",
+                suggestion = "Demi keamanan dan integritas presensi, absensi dari perangkat root diblokir."
+            )
+            return
+        }
+
         if (isMock) {
             _state.value = AbsenState.Error(
                 code = "MOCK_LOCATION",
                 message = "Lokasi tiruan (Fake GPS) terdeteksi dan dilarang keras.",
                 suggestion = "Nonaktifkan fitur Mock Location di Opsi Pengembang ponsel Anda."
+            )
+            return
+        }
+
+        if (accuracy > 50f) {
+            _state.value = AbsenState.Error(
+                code = "LOW_ACCURACY",
+                message = "Akurasi sinyal GPS terlalu rendah (±${accuracy.toInt()} meter, batas maksimal 50 meter).",
+                suggestion = "Pindahlah ke luar ruangan atau dekat jendela agar akurasi GPS meningkat, lalu tekan Coba Lagi."
             )
             return
         }
@@ -189,6 +230,10 @@ class AbsenViewModel @Inject constructor(
 
                 _state.value = AbsenState.Uploading(session)
 
+                // Request Play Integrity token using challenge nonce
+                val tokenResult = integrityManager.requestToken(challenge.nonce)
+                val integrityToken = tokenResult.getOrNull()
+
                 val submitResult = attendanceRepository.submitAttendance(
                     sessionId = session.id,
                     lat = lat,
@@ -197,7 +242,7 @@ class AbsenViewModel @Inject constructor(
                     nonce = challenge.nonce,
                     deviceId = deviceId,
                     mockFlag = isMock,
-                    integrityToken = null, // Stubbed for Phase F3
+                    integrityToken = integrityToken,
                     selfieBytes = selfieBytes
                 )
 

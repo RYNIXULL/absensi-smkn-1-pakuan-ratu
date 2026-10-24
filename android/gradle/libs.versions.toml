@@ -19,9 +19,11 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 playServicesLocation = "21.3.0"
 camerax = "1.4.0"
+playIntegrity = "1.4.0"
 
 [libraries]
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+play-integrity = { group = "com.google.android.play", name = "integrity", version.ref = "playIntegrity" }
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }

@@ -21,6 +21,8 @@ const envSchema = z.object({
     .preprocess((val) => val === 'true' || val === true, z.boolean())
     .default(false),
   PLAY_PACKAGE_NAME: z.string().default('com.absensi.app'),
+  GOOGLE_APPLICATION_CREDENTIALS: z.string().optional(),
+  GOOGLE_CLOUD_PROJECT_NUMBER: z.string().optional(),
   SPEED_CHECK_ENFORCE: z
     .preprocess((val) => val === 'true' || val === true, z.boolean())
     .default(false),

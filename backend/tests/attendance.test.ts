@@ -6,6 +6,7 @@ import { prisma } from '../src/lib/prisma';
 import { signAccessToken } from '../src/lib/token';
 import { AttendanceStatus, SessionStatus } from '@prisma/client';
 import { getStorageService, LocalStorageService } from '../src/lib/storage';
+import { createMockIntegrityToken, resetIntegrityVerifier } from '../src/lib/integrity';
 
 vi.mock('../src/lib/prisma', () => {
   return {
@@ -465,6 +466,164 @@ describe('Attendance System & Error Codes (FR-ABS-01..07)', () => {
 
       expect(res.status).toBe(400);
       expect(res.body.error.code).toBe('INVALID_SELFIE');
+    });
+
+    it('INTEGRITY_FAILED: should reject when integrity token has mismatched nonce', async () => {
+      setupValidPreconditions();
+      const mismatchedToken = createMockIntegrityToken({
+        requestDetails: {
+          requestPackageName: 'com.absensi.app',
+          nonce: 'completely-wrong-nonce',
+        },
+        deviceIntegrity: {
+          deviceRecognitionVerdict: ['MEETS_DEVICE_INTEGRITY'],
+        },
+        accountDetails: {
+          appLicensingVerdict: 'LICENSED',
+        },
+      });
+
+      const res = await request(app)
+        .post(`/api/v1/sessions/${sessionId}/attendance`)
+        .set('Authorization', `Bearer ${studentToken}`)
+        .field('lat', schoolLat)
+        .field('lng', schoolLng)
+        .field('accuracy', 10)
+        .field('nonce', validNonce)
+        .field('device_id', deviceId)
+        .field('mock_flag', 'false')
+        .field('integrity_token', mismatchedToken)
+        .attach('selfie', validJpegBuffer, 'selfie.jpg');
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('INTEGRITY_FAILED');
+      expect(prisma.auditLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            action: 'ATTENDANCE_REJECTED',
+            new_value: expect.objectContaining({ code: 'INTEGRITY_FAILED' }),
+          }),
+        })
+      );
+    });
+
+    it('INTEGRITY_FAILED: should reject when integrity token has mismatched package name', async () => {
+      setupValidPreconditions();
+      const wrongPackageToken = createMockIntegrityToken({
+        requestDetails: {
+          requestPackageName: 'com.fake.spoofedapp',
+          nonce: validNonce,
+        },
+        deviceIntegrity: {
+          deviceRecognitionVerdict: ['MEETS_DEVICE_INTEGRITY'],
+        },
+        accountDetails: {
+          appLicensingVerdict: 'LICENSED',
+        },
+      });
+
+      const res = await request(app)
+        .post(`/api/v1/sessions/${sessionId}/attendance`)
+        .set('Authorization', `Bearer ${studentToken}`)
+        .field('lat', schoolLat)
+        .field('lng', schoolLng)
+        .field('accuracy', 10)
+        .field('nonce', validNonce)
+        .field('device_id', deviceId)
+        .field('mock_flag', 'false')
+        .field('integrity_token', wrongPackageToken)
+        .attach('selfie', validJpegBuffer, 'selfie.jpg');
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('INTEGRITY_FAILED');
+    });
+
+    it('INTEGRITY_FAILED: should reject when device recognition verdict indicates untrusted/rooted/emulator device', async () => {
+      setupValidPreconditions();
+      const untrustedToken = createMockIntegrityToken({
+        requestDetails: {
+          requestPackageName: 'com.absensi.app',
+          nonce: validNonce,
+        },
+        deviceIntegrity: {
+          deviceRecognitionVerdict: [], // No MEETS_DEVICE_INTEGRITY
+        },
+        accountDetails: {
+          appLicensingVerdict: 'LICENSED',
+        },
+      });
+
+      const res = await request(app)
+        .post(`/api/v1/sessions/${sessionId}/attendance`)
+        .set('Authorization', `Bearer ${studentToken}`)
+        .field('lat', schoolLat)
+        .field('lng', schoolLng)
+        .field('accuracy', 10)
+        .field('nonce', validNonce)
+        .field('device_id', deviceId)
+        .field('mock_flag', 'false')
+        .field('integrity_token', untrustedToken)
+        .attach('selfie', validJpegBuffer, 'selfie.jpg');
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('INTEGRITY_FAILED');
+    });
+
+    it('INTEGRITY_FAILED: should reject when integrity token format is corrupted', async () => {
+      setupValidPreconditions();
+
+      const res = await request(app)
+        .post(`/api/v1/sessions/${sessionId}/attendance`)
+        .set('Authorization', `Bearer ${studentToken}`)
+        .field('lat', schoolLat)
+        .field('lng', schoolLng)
+        .field('accuracy', 10)
+        .field('nonce', validNonce)
+        .field('device_id', deviceId)
+        .field('mock_flag', 'false')
+        .field('integrity_token', 'malformed-gibberish-token')
+        .attach('selfie', validJpegBuffer, 'selfie.jpg');
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('INTEGRITY_FAILED');
+    });
+
+    it('INTEGRITY SUCCESS: should accept valid Play Integrity token and save integrity verdict', async () => {
+      setupValidPreconditions();
+      const validToken = createMockIntegrityToken({
+        requestDetails: {
+          requestPackageName: 'com.absensi.app',
+          nonce: validNonce,
+        },
+        deviceIntegrity: {
+          deviceRecognitionVerdict: ['MEETS_DEVICE_INTEGRITY'],
+        },
+        accountDetails: {
+          appLicensingVerdict: 'LICENSED',
+        },
+      });
+
+      const res = await request(app)
+        .post(`/api/v1/sessions/${sessionId}/attendance`)
+        .set('Authorization', `Bearer ${studentToken}`)
+        .field('lat', schoolLat)
+        .field('lng', schoolLng)
+        .field('accuracy', 10)
+        .field('nonce', validNonce)
+        .field('device_id', deviceId)
+        .field('mock_flag', 'false')
+        .field('integrity_token', validToken)
+        .attach('selfie', validJpegBuffer, 'selfie.jpg');
+
+      expect(res.status).toBe(201);
+      expect(prisma.attendance.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            integrity_verdict: 'MEETS_DEVICE_INTEGRITY',
+            mock_detected: false,
+          }),
+        })
+      );
     });
   });
 

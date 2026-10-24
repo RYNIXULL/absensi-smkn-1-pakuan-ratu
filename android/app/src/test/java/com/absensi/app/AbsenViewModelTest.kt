@@ -1,6 +1,7 @@
 package com.absensi.app
 
 import android.graphics.Bitmap
+import android.location.Location
 import androidx.lifecycle.SavedStateHandle
 import com.absensi.app.data.local.AuthPreferences
 import com.absensi.app.data.local.DeviceIdProvider
@@ -11,6 +12,11 @@ import com.absensi.app.data.remote.dto.PaginationMeta
 import com.absensi.app.data.remote.dto.SessionDto
 import com.absensi.app.data.remote.dto.SignedUrlDto
 import com.absensi.app.data.repository.AttendanceRepository
+import com.absensi.app.security.IntegrityManager
+import com.absensi.app.security.MockCheckResult
+import com.absensi.app.security.MockLocationChecker
+import com.absensi.app.security.RootCheckResult
+import com.absensi.app.security.RootChecker
 import com.absensi.app.ui.absen.AbsenState
 import com.absensi.app.ui.absen.AbsenViewModel
 import com.absensi.app.ui.absen.ImageProcessor
@@ -57,6 +63,33 @@ class FakeImageProcessor : ImageProcessor {
     ): ByteArray = processedBytes
 }
 
+class FakeMockLocationChecker : MockLocationChecker {
+    var isMock: Boolean = false
+    var mockEnvironmentResult: MockCheckResult = MockCheckResult(false)
+
+    override fun isMockLocation(location: Location?): Boolean = isMock
+    override fun isMockLocation(locationResult: LocationResult?): Boolean = isMock || locationResult?.isMock == true
+    override fun checkMockEnvironment(): MockCheckResult = mockEnvironmentResult
+}
+
+class FakeRootChecker : RootChecker {
+    var isRooted: Boolean = false
+    var rootReasons: List<String> = emptyList()
+
+    override fun checkRoot(): RootCheckResult = RootCheckResult(isRooted, rootReasons)
+    override fun isDeviceRooted(): Boolean = isRooted
+}
+
+class FakeIntegrityManager : IntegrityManager {
+    var tokenResult: Result<String> = Result.success("test_integrity_token")
+    var lastRequestedNonce: String? = null
+
+    override suspend fun requestToken(nonce: String): Result<String> {
+        lastRequestedNonce = nonce
+        return tokenResult
+    }
+}
+
 class FakeAttendanceRepository : AttendanceRepository {
     var challengeResult: Result<ChallengeDto> = Result.success(
         ChallengeDto("nonce-123", "2026-10-23T08:02:00.000Z", "2026-10-23T08:00:00.000Z")
@@ -87,6 +120,10 @@ class FakeAttendanceRepository : AttendanceRepository {
         )
     )
 
+    var lastSubmittedIntegrityToken: String? = null
+    var lastSubmittedMockFlag: Boolean = false
+    var lastSubmittedAccuracy: Float = 0f
+
     override suspend fun getSessions(
         status: String?,
         tanggal: String?,
@@ -114,7 +151,12 @@ class FakeAttendanceRepository : AttendanceRepository {
         mockFlag: Boolean,
         integrityToken: String?,
         selfieBytes: ByteArray
-    ): Result<AttendanceRecordDto> = submitResult
+    ): Result<AttendanceRecordDto> {
+        lastSubmittedIntegrityToken = integrityToken
+        lastSubmittedMockFlag = mockFlag
+        lastSubmittedAccuracy = accuracy
+        return submitResult
+    }
 
     override suspend fun getMyAttendances(
         page: Int,
@@ -151,6 +193,9 @@ class AbsenViewModelTest {
     private lateinit var fakeRepository: FakeAttendanceRepository
     private lateinit var fakeLocationService: FakeLocationService
     private lateinit var fakeImageProcessor: FakeImageProcessor
+    private lateinit var fakeMockLocationChecker: FakeMockLocationChecker
+    private lateinit var fakeRootChecker: FakeRootChecker
+    private lateinit var fakeIntegrityManager: FakeIntegrityManager
     private lateinit var fakeAuthPreferences: AuthPreferences
     private lateinit var fakeDeviceIdProvider: DeviceIdProvider
     private lateinit var viewModel: AbsenViewModel
@@ -180,6 +225,9 @@ class AbsenViewModelTest {
             )
         }
         fakeImageProcessor = FakeImageProcessor()
+        fakeMockLocationChecker = FakeMockLocationChecker()
+        fakeRootChecker = FakeRootChecker()
+        fakeIntegrityManager = FakeIntegrityManager()
 
         fakeAuthPreferences = mock<AuthPreferences>().apply {
             whenever(userName).thenReturn(flowOf("Budi Santoso"))
@@ -195,6 +243,9 @@ class AbsenViewModelTest {
             attendanceRepository = fakeRepository,
             locationService = fakeLocationService,
             imageProcessor = fakeImageProcessor,
+            mockLocationChecker = fakeMockLocationChecker,
+            rootChecker = fakeRootChecker,
+            integrityManager = fakeIntegrityManager,
             authPreferences = fakeAuthPreferences,
             deviceIdProvider = fakeDeviceIdProvider,
             savedStateHandle = savedStateHandle
@@ -251,13 +302,26 @@ class AbsenViewModelTest {
     }
 
     @Test
-    fun `when location is mock (Fake GPS), blocks and transitions to Error MOCK_LOCATION`() = runTest {
-        fakeLocationService.locationResult = LocationResult(
-            latitude = -6.175392,
-            longitude = 106.827153,
-            accuracy = 10.0f,
-            isMock = true // Fake GPS!
+    fun `when device is rooted, blocks and transitions to Error ROOT_DETECTED`() = runTest {
+        fakeRootChecker.isRooted = true
+        fakeRootChecker.rootReasons = listOf("Ditemukan file SU")
+
+        viewModel.onPermissionsChecked(
+            hasLocationPermission = true,
+            hasCameraPermission = true
         )
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertTrue("Expected Error state but got $state", state is AbsenState.Error)
+        val error = state as AbsenState.Error
+        assertEquals("ROOT_DETECTED", error.code)
+        assertTrue(error.message.contains("Root"))
+    }
+
+    @Test
+    fun `when location is mock (Fake GPS), blocks and transitions to Error MOCK_LOCATION`() = runTest {
+        fakeMockLocationChecker.isMock = true
 
         viewModel.onPermissionsChecked(
             hasLocationPermission = true,
@@ -269,6 +333,28 @@ class AbsenViewModelTest {
         assertTrue("Expected Error state but got $state", state is AbsenState.Error)
         val error = state as AbsenState.Error
         assertEquals("MOCK_LOCATION", error.code)
+    }
+
+    @Test
+    fun `when GPS accuracy is worse than 50m, transitions to Error LOW_ACCURACY`() = runTest {
+        fakeLocationService.locationResult = LocationResult(
+            latitude = -6.175392,
+            longitude = 106.827153,
+            accuracy = 75.0f, // > 50m!
+            isMock = false
+        )
+
+        viewModel.onPermissionsChecked(
+            hasLocationPermission = true,
+            hasCameraPermission = true
+        )
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertTrue("Expected Error state but got $state", state is AbsenState.Error)
+        val error = state as AbsenState.Error
+        assertEquals("LOW_ACCURACY", error.code)
+        assertTrue(error.message.contains("50"))
     }
 
     @Test
@@ -288,7 +374,7 @@ class AbsenViewModelTest {
     }
 
     @Test
-    fun `when captureAndSubmit called and submit succeeds, transitions to Success`() = runTest {
+    fun `when captureAndSubmit called and submit succeeds, requests Play Integrity token and transitions to Success`() = runTest {
         viewModel.onPermissionsChecked(
             hasLocationPermission = true,
             hasCameraPermission = true
@@ -305,6 +391,32 @@ class AbsenViewModelTest {
         assertTrue("Expected Success state but got $state", state is AbsenState.Success)
         val success = state as AbsenState.Success
         assertEquals("hadir", success.attendance.status)
+        assertEquals("test_integrity_token", fakeRepository.lastSubmittedIntegrityToken)
+        assertEquals("nonce-123", fakeIntegrityManager.lastRequestedNonce)
+    }
+
+    @Test
+    fun `when submit fails with INTEGRITY_FAILED, transitions to Error INTEGRITY_FAILED with suggestion`() = runTest {
+        viewModel.onPermissionsChecked(
+            hasLocationPermission = true,
+            hasCameraPermission = true
+        )
+        advanceUntilIdle()
+
+        val errorBody = """{"error":{"code":"INTEGRITY_FAILED","message":"Integritas perangkat gagal"}}"""
+            .toResponseBody("application/json".toMediaType())
+        val httpException = HttpException(Response.error<Any>(400, errorBody))
+        fakeRepository.submitResult = Result.failure(httpException)
+
+        val mockBitmap = mock<Bitmap>()
+        viewModel.captureAndSubmit(mockBitmap)
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertTrue("Expected Error state but got $state", state is AbsenState.Error)
+        val error = state as AbsenState.Error
+        assertEquals("INTEGRITY_FAILED", error.code)
+        assertTrue(error.suggestion.contains("firmware") || error.suggestion.contains("Play Store"))
     }
 
     @Test

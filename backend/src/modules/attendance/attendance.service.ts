@@ -6,6 +6,7 @@ import { calculateHaversineDistance } from '../../lib/haversine';
 import { getStorageService } from '../../lib/storage';
 import { getIntegrityVerifier } from '../../lib/integrity';
 import { logger } from '../../lib/logger';
+import { env } from '../../config/env';
 
 export class AttendanceService {
   private async logRejection(
@@ -203,7 +204,8 @@ export class AttendanceService {
         sessionId,
         studentId,
         'INTEGRITY_FAILED',
-        'Verifikasi integritas perangkat gagal'
+        integrityResult.errorDetails || 'Verifikasi integritas perangkat gagal',
+        { verdict: integrityResult.verdict, details: integrityResult.errorDetails }
       );
       throw new AppError(
         'INTEGRITY_FAILED',
@@ -228,17 +230,18 @@ export class AttendanceService {
     }
 
     // 8. Akurasi GPS <= batas (default 50 m)
-    if (data.accuracy > 50) {
+    const maxAccuracy = env.ATTENDANCE_MAX_ACCURACY_M;
+    if (data.accuracy > maxAccuracy) {
       await this.logRejection(
         sessionId,
         studentId,
         'LOW_ACCURACY',
-        `Akurasi GPS ${data.accuracy}m melebihi batas 50m`,
-        { accuracy: data.accuracy }
+        `Akurasi GPS ${data.accuracy}m melebihi batas ${maxAccuracy}m`,
+        { accuracy: data.accuracy, max_accuracy: maxAccuracy }
       );
       throw new AppError(
         'LOW_ACCURACY',
-        'Akurasi sinyal GPS terlalu rendah (lebih dari 50 meter). Pindahlah ke area terbuka.',
+        `Akurasi sinyal GPS terlalu rendah (lebih dari ${maxAccuracy} meter). Pindahlah ke area terbuka.`,
         400
       );
     }
