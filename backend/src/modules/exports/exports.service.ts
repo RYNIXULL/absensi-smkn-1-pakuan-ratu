@@ -224,16 +224,16 @@ export class ExportsService {
       row.getCell(1).value = i + 1;
       row.getCell(2).value = dateFormatted;
       row.getCell(3).value = dayName;
-      row.getCell(4).value = att.session.schedule?.class?.name || '-';
-      row.getCell(5).value = att.session.schedule?.subject?.name || '-';
+      row.getCell(4).value = att.session.schedule?.class?.nama || '-';
+      row.getCell(5).value = att.session.schedule?.subject?.nama || '-';
       row.getCell(6).value = att.session.schedule?.teacher?.nama || '-';
       row.getCell(7).value = att.student.nomor_induk;
       row.getCell(8).value = att.student.nama;
       row.getCell(9).value = att.status.toUpperCase();
       row.getCell(10).value = checkinFormatted;
-      row.getCell(11).value = att.session.schedule?.location?.name || '-';
-      row.getCell(12).value = att.latitude != null ? att.latitude : '-';
-      row.getCell(13).value = att.longitude != null ? att.longitude : '-';
+      row.getCell(11).value = att.session.schedule?.location?.nama || '-';
+      row.getCell(12).value = att.latitude != null ? Number(att.latitude) : '-';
+      row.getCell(13).value = att.longitude != null ? Number(att.longitude) : '-';
       row.getCell(14).value = att.distance_m != null ? Math.round(att.distance_m) : '-';
       row.getCell(15).value = att.accuracy_m != null ? Math.round(att.accuracy_m) : '-';
 
@@ -381,7 +381,7 @@ export class ExportsService {
         studentMap.set(studentId, {
           nomor_induk: att.student.nomor_induk,
           nama: att.student.nama,
-          className: att.session.schedule?.class?.name || '-',
+          className: att.session.schedule?.class?.nama || '-',
           hadir: 0,
           terlambat: 0,
           izin: 0,

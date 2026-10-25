@@ -366,17 +366,17 @@ Ketentuan:
 
 ## 12. Rencana pengerjaan dan kriteria selesai
 
-| Fase | Isi | Kriteria selesai |
-|---|---|---|
-| F0 | Setup repo, docker-compose, skema Prisma, CI dasar | `docker compose up` jalan; migrasi sukses |
-| F1 | Auth, RBAC, manajemen pengguna, ikat perangkat | Login 3 role; endpoint terlarang mengembalikan 403; tes RBAC lulus |
-| F2 | Master data: kelas, mapel, lokasi, jadwal | CRUD lengkap + validasi; impor Excel pengguna |
-| F3 | Sesi + absensi inti (lokasi, jarak, selfie, waktu server) | Absen sukses di dalam radius, ditolak di luar radius; tes unit Haversine |
-| F4 | Anti-cheat: nonce, Play Integrity, deteksi mock/root, akurasi | Semua kode error absensi teruji; percobaan palsu tercatat |
-| F5 | Izin/sakit + persetujuan + alpa otomatis | Alur izin end-to-end; cron alpa teruji |
-| F6 | Ekspor Excel + filter | File terbuka di Excel, kolom sesuai bagian 9, guru terbatas kelasnya |
-| F7 | FCM, audit log, polesan UI, penanganan error | Notifikasi sesi dibuka; audit tercatat |
-| F8 | Pengujian menyeluruh, hardening, rilis APK | Daftar uji bagian 13 lulus |
+| Fase | Isi | Kriteria selesai | Status |
+|---|---|---|---|
+| F0 | Setup repo, docker-compose, skema Prisma, CI dasar | `docker compose up` jalan; migrasi sukses | Selesai |
+| F1 | Auth, RBAC, manajemen pengguna, ikat perangkat | Login 3 role; endpoint terlarang mengembalikan 403; tes RBAC lulus | Selesai |
+| F2 | Master data: kelas, mapel, lokasi, jadwal | CRUD lengkap + validasi; impor Excel pengguna | Selesai |
+| F3 | Sesi + absensi inti (lokasi, jarak, selfie, waktu server) | Absen sukses di dalam radius, ditolak di luar radius; tes unit Haversine | Selesai |
+| F4 | Anti-cheat: nonce, Play Integrity, deteksi mock/root, akurasi | Semua kode error absensi teruji; percobaan palsu tercatat | Selesai |
+| F5 | Izin/sakit + persetujuan + alpa otomatis | Alur izin end-to-end; cron alpa teruji | Selesai |
+| F6 | Ekspor Excel + filter | File terbuka di Excel, kolom sesuai bagian 9, guru terbatas kelasnya | Selesai |
+| F7 | FCM, audit log, polesan UI, penanganan error | Notifikasi sesi dibuka; audit tercatat | Selesai |
+| F8 | Pengujian menyeluruh, hardening, rilis APK | Daftar uji bagian 13 lulus | Selesai (18 file tes / 165 tes backend lulus 100%, lint & build TypeScript tsc sukses, assembleDebug & testDebugUnitTest Android sukses) |
 
 ## 13. Pengujian
 - Backend: unit test (Haversine, penentuan status, RBAC), integration test endpoint absen (Supertest) dengan semua kode error.

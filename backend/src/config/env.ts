@@ -36,6 +36,9 @@ const envSchema = z.object({
   LEAVE_MAX_BACKDATE_DAYS: z.coerce.number().default(3),
   EXPORT_MAX_RANGE_DAYS: z.coerce.number().default(31),
   EXPORT_LINK_TTL_HOURS: z.coerce.number().default(168),
+  FIREBASE_PROJECT_ID: z.string().optional(),
+  FIREBASE_CLIENT_EMAIL: z.string().optional(),
+  FIREBASE_PRIVATE_KEY: z.string().optional(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

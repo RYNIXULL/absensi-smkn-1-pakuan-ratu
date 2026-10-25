@@ -18,12 +18,15 @@ import leaveRouter from './modules/leave/leave.routes';
 import { exportsRouter } from './modules/exports/exports.routes';
 import { auditRouter } from './modules/audit/audit.routes';
 
+import { generalApiRateLimiter } from './middleware/loginRateLimiter';
+
 export const app: Application = express();
 
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/api/v1', generalApiRateLimiter);
 
 app.get('/api/v1/health', (_req: Request, res: Response) => {
   res.status(200).json({
