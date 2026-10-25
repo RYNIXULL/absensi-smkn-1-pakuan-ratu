@@ -7,9 +7,16 @@ import { requireRole } from '../../middleware/rbac';
 const router = Router();
 
 router.use(authenticate);
-router.use(requireRole(UserRole.operator));
 
-router.get('/requests', (req, res, next) => devicesController.getPendingRequests(req, res, next));
-router.patch('/:id', (req, res, next) => devicesController.reviewRequest(req, res, next));
+// Update FCM Token (semua role yang login)
+router.post('/fcm-token', (req, res, next) => devicesController.updateFcmToken(req, res, next));
+
+// Operator-only endpoints
+router.get('/requests', requireRole(UserRole.operator), (req, res, next) =>
+  devicesController.getPendingRequests(req, res, next)
+);
+router.patch('/:id', requireRole(UserRole.operator), (req, res, next) =>
+  devicesController.reviewRequest(req, res, next)
+);
 
 export const devicesRouter = router;

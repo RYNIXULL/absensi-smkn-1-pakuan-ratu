@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { devicesService } from './devices.service';
-import { updateDeviceRequestSchema } from './devices.schema';
+import { updateDeviceRequestSchema, updateFcmTokenSchema } from './devices.schema';
 import { AppError } from '../../errors/appError';
 
 export class DevicesController {
@@ -22,6 +22,19 @@ export class DevicesController {
       const validated = updateDeviceRequestSchema.parse(req.body);
       const result = await devicesService.reviewRequest(deviceId, req.user.id, validated.action);
       res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateFcmToken(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new AppError('UNAUTHORIZED', 'Autentikasi diperlukan', 401);
+      }
+      const validated = updateFcmTokenSchema.parse(req.body);
+      const result = await devicesService.updateFcmToken(req.user.id, validated);
+      res.status(200).json({ data: result });
     } catch (error) {
       next(error);
     }

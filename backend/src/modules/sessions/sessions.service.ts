@@ -10,6 +10,7 @@ import {
 import { DEFAULT_LATE_AFTER_MIN, DEFAULT_OPEN_BEFORE_MIN } from '../../jobs/sessionManager';
 import { processAutoAlpa } from '../../jobs/autoAlpa';
 import { logger } from '../../lib/logger';
+import { fcmService } from '../../lib/fcm';
 
 export class SessionsService {
   /**
@@ -139,6 +140,11 @@ export class SessionsService {
         entity_id: newSession.id,
         new_value: { status: newSession.status, opened_by: userId },
       },
+    });
+
+    // Kirim notifikasi FCM ke siswa kelas
+    fcmService.notifyClassSessionOpened(newSession.id).catch((err) => {
+      logger.error({ err, sessionId: newSession.id }, 'Gagal mengirim notifikasi sesi dibuka');
     });
 
     return newSession;

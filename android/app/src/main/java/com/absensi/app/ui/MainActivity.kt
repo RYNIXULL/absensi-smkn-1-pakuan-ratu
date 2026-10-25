@@ -6,12 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.absensi.app.ui.navigation.AppNavGraph
 import com.absensi.app.ui.theme.AbsensiTheme
+import com.absensi.app.util.NotificationHelper
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        NotificationHelper.createNotificationChannels(this)
         enableEdgeToEdge()
         setContent {
             AbsensiTheme {

@@ -9,6 +9,7 @@ import {
   LeaveRequestQuery,
   ReviewLeaveRequestInput,
 } from './leave.types';
+import { fcmService } from '../../lib/fcm';
 
 export class LeaveService {
   /**
@@ -354,6 +355,9 @@ export class LeaveService {
 
       return updatedLeave;
     });
+
+    // Kirim notifikasi FCM ke siswa
+    fcmService.notifyLeaveReviewed(requestId).catch(() => {});
 
     return updated;
   }

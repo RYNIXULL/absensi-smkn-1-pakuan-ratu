@@ -2,6 +2,8 @@ import { RequestStatus } from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 import { AppError } from '../../errors/appError';
 import { logAudit } from '../../lib/audit';
+import { fcmService } from '../../lib/fcm';
+import { UpdateFcmTokenInput } from './devices.schema';
 
 export class DevicesService {
   async getPendingRequests() {
@@ -64,6 +66,9 @@ export class DevicesService {
         new_value: { user_id: device.user_id, device_id: device.device_id, status: 'disetujui' },
       });
 
+      // Dispatch FCM push notification asynchronously
+      fcmService.notifyDeviceReviewed(device.id, 'setujui').catch(() => {});
+
       return { message: 'Perangkat berhasil disetujui' };
     } else {
       await prisma.device.update({
@@ -82,8 +87,35 @@ export class DevicesService {
         new_value: { user_id: device.user_id, device_id: device.device_id, status: 'ditolak' },
       });
 
+      // Dispatch FCM push notification asynchronously
+      fcmService.notifyDeviceReviewed(device.id, 'tolak').catch(() => {});
+
       return { message: 'Perangkat berhasil ditolak' };
     }
+  }
+
+  async updateFcmToken(userId: string, input: UpdateFcmTokenInput) {
+    const device = await prisma.device.findFirst({
+      where: {
+        user_id: userId,
+        device_id: input.device_id,
+        is_active: true,
+      },
+    });
+
+    if (!device) {
+      throw new AppError('DEVICE_NOT_FOUND', 'Perangkat aktif tidak ditemukan untuk akun ini', 404);
+    }
+
+    const updated = await prisma.device.update({
+      where: { id: device.id },
+      data: { fcm_token: input.fcm_token },
+    });
+
+    return {
+      message: 'FCM token berhasil diperbarui',
+      device_id: updated.device_id,
+    };
   }
 }
 

@@ -16,6 +16,7 @@ import attendanceRouter, { myAttendanceRouter } from './modules/attendance/atten
 import filesRouter from './modules/files/files.routes';
 import leaveRouter from './modules/leave/leave.routes';
 import { exportsRouter } from './modules/exports/exports.routes';
+import { auditRouter } from './modules/audit/audit.routes';
 
 export const app: Application = express();
 
@@ -51,5 +52,8 @@ app.use('/api/v1/leave-requests', leaveRouter);
 
 // Ekspor Rekap Excel (Fase F6)
 app.use('/api/v1/exports', exportsRouter);
+
+// Log Audit Sistem (Fase F7)
+app.use('/api/v1/audit-logs', auditRouter);
 
 app.use(errorHandler);

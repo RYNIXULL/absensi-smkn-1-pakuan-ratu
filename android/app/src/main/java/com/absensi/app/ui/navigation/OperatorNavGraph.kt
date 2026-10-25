@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.MeetingRoom
 import androidx.compose.material.icons.automirrored.filled.FactCheck
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -56,6 +57,7 @@ fun OperatorHomeScreen(
     onNavigateToSessions: () -> Unit,
     onNavigateToLeaveApproval: () -> Unit,
     onNavigateToRekap: () -> Unit,
+    onNavigateToAuditLog: () -> Unit,
     onLogout: () -> Unit
 ) {
     Box(
@@ -197,6 +199,17 @@ fun OperatorHomeScreen(
                     icon = Icons.Default.Assessment,
                     iconTint = Color(0xFF0284C7),
                     onClick = onNavigateToRekap
+                )
+            }
+
+            // 9. Log Audit Sistem
+            item {
+                OperatorMenuCard(
+                    title = "Log Audit Sistem",
+                    subtitle = "Riwayat audit keamanan, perubahan data & verifikasi aksi",
+                    icon = Icons.Default.Security,
+                    iconTint = Color(0xFFE11D48),
+                    onClick = onNavigateToAuditLog
                 )
             }
 

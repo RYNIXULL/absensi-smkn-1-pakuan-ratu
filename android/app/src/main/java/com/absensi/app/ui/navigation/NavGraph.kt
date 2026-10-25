@@ -33,6 +33,8 @@ import com.absensi.app.ui.leave.LeaveApprovalScreen
 import com.absensi.app.ui.leave.LeaveApprovalViewModel
 import com.absensi.app.ui.rekap.RekapScreen
 import com.absensi.app.ui.rekap.RekapViewModel
+import com.absensi.app.ui.audit.AuditLogScreen
+import com.absensi.app.ui.audit.AuditLogViewModel
 
 sealed class Screen(val route: String) {
     data object Login : Screen("login")
@@ -50,6 +52,7 @@ sealed class Screen(val route: String) {
     data object SiswaLeave : Screen("siswa_leave")
     data object LeaveApproval : Screen("leave_approval")
     data object RekapExport : Screen("rekap_export")
+    data object AuditLog : Screen("audit_log")
     data object Sessions : Screen("sessions")
 
     companion object {
@@ -204,10 +207,22 @@ fun AppNavGraph(
                 onNavigateToSessions = { navController.navigate(Screen.Sessions.route) },
                 onNavigateToLeaveApproval = { navController.navigate(Screen.LeaveApproval.route) },
                 onNavigateToRekap = { navController.navigate(Screen.RekapExport.route) },
+                onNavigateToAuditLog = { navController.navigate(Screen.AuditLog.route) },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        // Log Audit Sistem (Operator)
+        composable(Screen.AuditLog.route) {
+            val auditLogViewModel: AuditLogViewModel = hiltViewModel()
+            AuditLogScreen(
+                viewModel = auditLogViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

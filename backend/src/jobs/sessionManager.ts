@@ -5,6 +5,8 @@ import { getJakartaDateInfo, parseTimeToMinutes, createUtcFromJakartaTime } from
 import { SessionStatus } from '@prisma/client';
 import { processAutoAlpa } from './autoAlpa';
 
+import { fcmService } from '../lib/fcm';
+
 export const DEFAULT_OPEN_BEFORE_MIN = 15;
 export const DEFAULT_LATE_AFTER_MIN = 15;
 
@@ -96,6 +98,24 @@ export async function processSessionLifecycle(currentDate = new Date()): Promise
       status: SessionStatus.terbuka,
     },
   });
+
+  if (openedResult.count > 0) {
+    prisma.attendanceSession
+      .findMany({
+        where: {
+          status: SessionStatus.terbuka,
+          open_at: { lte: currentDate },
+          close_at: { gt: currentDate },
+        },
+        select: { id: true },
+      })
+      .then((sessions) => {
+        for (const s of sessions) {
+          fcmService.notifyClassSessionOpened(s.id).catch(() => {});
+        }
+      })
+      .catch(() => {});
+  }
 
   // 4. Transition 'terbuka' -> 'ditutup' when close_at <= now
   const closedResult = await prisma.attendanceSession.updateMany({

@@ -93,4 +93,10 @@ object AppModule {
     fun provideExportApi(retrofit: Retrofit): com.absensi.app.data.remote.ExportApi {
         return retrofit.create(com.absensi.app.data.remote.ExportApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideAuditApi(retrofit: Retrofit): com.absensi.app.data.remote.AuditApi {
+        return retrofit.create(com.absensi.app.data.remote.AuditApi::class.java)
+    }
 }
