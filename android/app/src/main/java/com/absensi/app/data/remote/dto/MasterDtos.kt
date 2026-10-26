@@ -4,16 +4,16 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PaginationMeta(
-    val page: Int,
-    val pageSize: Int,
-    val total: Int,
-    val totalPages: Int
+    val page: Int = 1,
+    val pageSize: Int = 20,
+    val total: Int = 0,
+    val totalPages: Int = 1
 )
 
 @Serializable
 data class PaginatedResponse<T>(
-    val data: List<T>,
-    val pagination: PaginationMeta
+    val data: List<T> = emptyList(),
+    val pagination: PaginationMeta = PaginationMeta()
 )
 
 @Serializable

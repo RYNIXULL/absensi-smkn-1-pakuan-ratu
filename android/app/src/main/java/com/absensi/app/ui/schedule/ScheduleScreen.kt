@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -48,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.absensi.app.data.remote.dto.ScheduleDto
 import com.absensi.app.ui.common.AppToastHost
+import com.absensi.app.ui.common.AppTooltip
 
 private val DAY_NAMES = mapOf(
     1 to "Senin",
@@ -80,6 +83,8 @@ fun ScheduleScreen(
                     colors = listOf(Color(0xFF0F172A), Color(0xFF1E293B))
                 )
             )
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
@@ -169,12 +174,17 @@ private fun ScheduleTopBar(
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onNavigateBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Kembali",
-                    tint = Color.White
-                )
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.size(44.dp)
+            ) {
+                AppTooltip(tooltip = "Kembali ke Dashboard") {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Kembali",
+                        tint = Color.White
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(8.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -193,11 +203,13 @@ private fun ScheduleTopBar(
                 )
             }
             IconButton(onClick = onRefresh) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Muat Ulang",
-                    tint = Color(0xFF38BDF8)
-                )
+                AppTooltip(tooltip = "Muat ulang jadwal pelajaran") {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Muat Ulang",
+                        tint = Color(0xFF38BDF8)
+                    )
+                }
             }
         }
     }

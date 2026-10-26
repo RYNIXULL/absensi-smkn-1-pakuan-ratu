@@ -71,14 +71,17 @@ export class UsersService {
       }),
     ]);
 
+    const pagination = {
+      page: query.page,
+      pageSize: query.pageSize,
+      total,
+      totalPages: Math.ceil(total / query.pageSize) || 1,
+    };
+
     return {
       data: users,
-      meta: {
-        page: query.page,
-        pageSize: query.pageSize,
-        total,
-        totalPages: Math.ceil(total / query.pageSize),
-      },
+      pagination,
+      meta: pagination,
     };
   }
 

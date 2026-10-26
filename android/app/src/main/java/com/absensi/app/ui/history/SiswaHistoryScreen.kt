@@ -49,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.absensi.app.data.remote.dto.AttendanceRecordDto
+import com.absensi.app.ui.common.AppTooltip
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,21 +72,28 @@ fun SiswaHistoryScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = Color.White
-                        )
+                    IconButton(
+                        onClick = onNavigateBack,
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        AppTooltip(tooltip = "Kembali ke Dashboard") {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Kembali",
+                                tint = Color.White
+                            )
+                        }
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.loadHistory() }) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Segarkan",
-                            tint = Color.White
-                        )
+                        AppTooltip(tooltip = "Segarkan riwayat kehadiran") {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Segarkan",
+                                tint = Color.White
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

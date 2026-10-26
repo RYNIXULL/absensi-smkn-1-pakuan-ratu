@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -67,6 +69,7 @@ import com.absensi.app.data.remote.dto.ScheduleDto
 import com.absensi.app.ui.common.AppConfirmDialog
 import com.absensi.app.ui.common.AppPaginationControl
 import com.absensi.app.ui.common.AppToastHost
+import com.absensi.app.ui.common.AppTooltip
 
 fun getDayName(day: Int): String {
     return when (day) {
@@ -100,6 +103,8 @@ fun OperatorSchedulesScreen(
                     colors = listOf(Color(0xFF0F172A), Color(0xFF1E293B))
                 )
             )
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
@@ -114,15 +119,17 @@ fun OperatorSchedulesScreen(
                 IconButton(
                     onClick = onNavigateBack,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.1f))
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Kembali",
-                        tint = Color.White
-                    )
+                    AppTooltip(tooltip = "Kembali ke Dashboard") {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = Color.White
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
@@ -147,8 +154,10 @@ fun OperatorSchedulesScreen(
                 },
                 trailingIcon = {
                     if (uiState.searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
-                            Icon(imageVector = Icons.Default.Clear, contentDescription = "Hapus", tint = Color(0xFF94A3B8))
+                        AppTooltip(tooltip = "Hapus teks pencarian") {
+                            IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
+                                Icon(imageVector = Icons.Default.Clear, contentDescription = "Hapus", tint = Color(0xFF94A3B8))
+                            }
                         }
                     }
                 },
@@ -241,7 +250,9 @@ fun OperatorSchedulesScreen(
             contentColor = Color.White,
             shape = RoundedCornerShape(16.dp)
         ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Jadwal")
+            AppTooltip(tooltip = "Tambah Jadwal Pelajaran Baru") {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Jadwal")
+            }
         }
 
         // Toast Host
@@ -345,11 +356,15 @@ fun ScheduleItemCard(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = onEdit) {
-                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = Color(0xFF94A3B8), modifier = Modifier.size(18.dp))
+                AppTooltip(tooltip = "Edit jadwal pelajaran") {
+                    IconButton(onClick = onEdit) {
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = Color(0xFF94A3B8), modifier = Modifier.size(18.dp))
+                    }
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Hapus", tint = Color(0xFFEF4444), modifier = Modifier.size(18.dp))
+                AppTooltip(tooltip = "Hapus jadwal ini") {
+                    IconButton(onClick = onDelete) {
+                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Hapus", tint = Color(0xFFEF4444), modifier = Modifier.size(18.dp))
+                    }
                 }
             }
 

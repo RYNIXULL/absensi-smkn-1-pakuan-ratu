@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -62,6 +64,7 @@ import androidx.compose.ui.window.Dialog
 import com.absensi.app.data.remote.dto.LeaveRequestDto
 import com.absensi.app.ui.common.AppPaginationControl
 import com.absensi.app.ui.common.AppToastHost
+import com.absensi.app.ui.common.AppTooltip
 import com.absensi.app.ui.common.ToastMessage
 import com.absensi.app.ui.common.ToastType
 
@@ -93,6 +96,8 @@ fun LeaveApprovalScreen(
                     colors = listOf(Color(0xFF0F172A), Color(0xFF1E293B))
                 )
             )
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
@@ -109,16 +114,18 @@ fun LeaveApprovalScreen(
                 IconButton(
                     onClick = onNavigateBack,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.1f))
                         .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Kembali",
-                        tint = Color.White
-                    )
+                    AppTooltip(tooltip = "Kembali ke Dashboard") {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = Color.White
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
@@ -415,33 +422,35 @@ private fun ApprovalRequestCard(
             // Attachment Button
             if (!request.attachment_key.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = onViewAttachment,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(
-                        1.dp,
-                        Brush.horizontalGradient(
-                            listOf(Color(0xFF38BDF8).copy(alpha = 0.4f), Color(0xFF818CF8).copy(alpha = 0.4f))
+                AppTooltip(tooltip = "Buka berkas surat izin / surat dokter di browser") {
+                    OutlinedButton(
+                        onClick = onViewAttachment,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(
+                            1.dp,
+                            Brush.horizontalGradient(
+                                listOf(Color(0xFF38BDF8).copy(alpha = 0.4f), Color(0xFF818CF8).copy(alpha = 0.4f))
+                            )
+                        ),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Color(0xFF38BDF8).copy(alpha = 0.08f)
                         )
-                    ),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = Color(0xFF38BDF8).copy(alpha = 0.08f)
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AttachFile,
-                        contentDescription = null,
-                        tint = Color(0xFF38BDF8),
-                        modifier = Modifier.size(15.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Lihat Dokumen / Bukti Lampiran",
-                        color = Color(0xFF38BDF8),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AttachFile,
+                            contentDescription = null,
+                            tint = Color(0xFF38BDF8),
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Lihat Dokumen / Bukti Lampiran",
+                            color = Color(0xFF38BDF8),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
 
@@ -453,61 +462,65 @@ private fun ApprovalRequestCard(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     // Tolak Button
-                    OutlinedButton(
-                        onClick = onReject,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(42.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        border = BorderStroke(
-                            1.dp,
-                            Brush.horizontalGradient(
-                                listOf(Color(0xFFF43F5E).copy(alpha = 0.5f), Color(0xFFE11D48).copy(alpha = 0.5f))
+                    AppTooltip(tooltip = "Tolak permohonan izin/sakit ini") {
+                        OutlinedButton(
+                            onClick = onReject,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(42.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            border = BorderStroke(
+                                1.dp,
+                                Brush.horizontalGradient(
+                                    listOf(Color(0xFFF43F5E).copy(alpha = 0.5f), Color(0xFFE11D48).copy(alpha = 0.5f))
+                                )
+                            ),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = Color(0xFFF43F5E).copy(alpha = 0.1f)
                             )
-                        ),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color(0xFFF43F5E).copy(alpha = 0.1f)
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = null,
-                            tint = Color(0xFFFB7185),
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Tolak",
-                            color = Color(0xFFFB7185),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
-                        )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = null,
+                                tint = Color(0xFFFB7185),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Tolak",
+                                color = Color(0xFFFB7185),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp
+                            )
+                        }
                     }
 
                     // Setujui Button
-                    Button(
-                        onClick = onApprove,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(42.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF059669)
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Setujui",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
-                        )
+                    AppTooltip(tooltip = "Setujui permohonan izin/sakit ini") {
+                        Button(
+                            onClick = onApprove,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(42.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF059669)
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Setujui",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp
+                            )
+                        }
                     }
                 }
             } else {

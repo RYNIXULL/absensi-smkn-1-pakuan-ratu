@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -46,6 +48,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.absensi.app.ui.common.AppTooltip
 
 @Composable
 fun LoginScreen(
@@ -82,6 +85,8 @@ fun LoginScreen(
                     )
                 )
             )
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -192,11 +197,13 @@ fun LoginScreen(
                     ),
                     trailingIcon = {
                         IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                            Text(
-                                text = if (isPasswordVisible) "Sembunyi" else "Lihat",
-                                color = Color(0xFF94A3B8),
-                                fontSize = 11.sp
-                            )
+                            AppTooltip(tooltip = if (isPasswordVisible) "Sembunyikan password" else "Tampilkan password") {
+                                Text(
+                                    text = if (isPasswordVisible) "Sembunyi" else "Lihat",
+                                    color = Color(0xFF94A3B8),
+                                    fontSize = 11.sp
+                                )
+                            }
                         }
                     },
                     colors = OutlinedTextFieldDefaults.colors(

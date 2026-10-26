@@ -47,11 +47,13 @@ fun AppPaginationControl(
                 brush = SolidColor(if (currentPage > 1) Color.White.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.1f))
             )
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Sebelumnya",
-                tint = if (currentPage > 1) Color.White else Color.White.copy(alpha = 0.3f)
-            )
+            AppTooltip(tooltip = "Halaman sebelumnya") {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Sebelumnya",
+                    tint = if (currentPage > 1) Color.White else Color.White.copy(alpha = 0.3f)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -72,11 +74,13 @@ fun AppPaginationControl(
                 brush = SolidColor(if (currentPage < totalPages) Color.White.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.1f))
             )
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "Berikutnya",
-                tint = if (currentPage < totalPages) Color.White else Color.White.copy(alpha = 0.3f)
-            )
+            AppTooltip(tooltip = "Halaman berikutnya") {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "Berikutnya",
+                    tint = if (currentPage < totalPages) Color.White else Color.White.copy(alpha = 0.3f)
+                )
+            }
         }
     }
 }

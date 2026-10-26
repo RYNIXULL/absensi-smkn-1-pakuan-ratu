@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import com.absensi.app.data.remote.dto.AttendanceRecordDto
 import com.absensi.app.data.remote.dto.ScheduleDto
 import com.absensi.app.data.remote.dto.SessionDto
+import com.absensi.app.ui.common.AppTooltip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,21 +83,28 @@ fun SessionsScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = Color.White
-                        )
+                    IconButton(
+                        onClick = onNavigateBack,
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        AppTooltip(tooltip = "Kembali ke Dashboard") {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Kembali",
+                                tint = Color.White
+                            )
+                        }
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.loadData() }) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Segarkan",
-                            tint = Color.White
-                        )
+                        AppTooltip(tooltip = "Segarkan daftar sesi") {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Segarkan",
+                                tint = Color.White
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -110,7 +118,9 @@ fun SessionsScreen(
                 containerColor = Color(0xFF2563EB),
                 contentColor = Color.White
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Buka Sesi Manual")
+                AppTooltip(tooltip = "Buka sesi absensi baru secara manual") {
+                    Icon(Icons.Default.Add, contentDescription = "Buka Sesi Manual")
+                }
             }
         }
     ) { paddingValues ->
@@ -288,9 +298,13 @@ private fun SessionCard(
 
                 Row {
                     TextButton(onClick = onViewAttendees) {
-                        Icon(Icons.Default.Groups, contentDescription = null, tint = Color(0xFF60A5FA), modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Peserta", color = Color(0xFF60A5FA), fontSize = 12.sp)
+                        AppTooltip(tooltip = "Lihat daftar siswa yang telah check-in") {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Groups, contentDescription = null, tint = Color(0xFF60A5FA), modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Peserta", color = Color(0xFF60A5FA), fontSize = 12.sp)
+                            }
+                        }
                     }
 
                     if (isOpen) {
@@ -301,9 +315,13 @@ private fun SessionCard(
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.height(34.dp)
                         ) {
-                            Icon(Icons.Default.Stop, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Tutup Sesi", color = Color.White, fontSize = 11.sp)
+                            AppTooltip(tooltip = "Tutup sesi absensi sekarang") {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Stop, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Tutup Sesi", color = Color.White, fontSize = 11.sp)
+                                }
+                            }
                         }
                     }
                 }
@@ -331,7 +349,9 @@ private fun AttendeesView(
                 fontSize = 16.sp
             )
             IconButton(onClick = onClose) {
-                Icon(Icons.Default.Close, contentDescription = "Tutup", tint = Color.White)
+                AppTooltip(tooltip = "Tutup daftar hadir") {
+                    Icon(Icons.Default.Close, contentDescription = "Tutup", tint = Color.White)
+                }
             }
         }
 

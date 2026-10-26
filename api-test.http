@@ -1,0 +1,79 @@
+### 1. Health Check
+GET http://localhost:3000/api/v1/health
+
+@defaultPassword = YOUR_PASSWORD_HERE
+
+### 2. Login Operator
+# @name loginOperator
+POST http://localhost:3000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "identifier": "OP001",
+  "password": "{{defaultPassword}}",
+  "device": {
+    "device_id": "review-pc-operator",
+    "model": "Desktop Client"
+  }
+}
+
+### Simpan token operator dari respons di atas
+@operatorToken = {{loginOperator.response.body.accessToken}}
+
+### 3. Login Guru
+# @name loginGuru
+POST http://localhost:3000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "identifier": "GURU001",
+  "password": "{{defaultPassword}}",
+  "device": {
+    "device_id": "review-pc-guru",
+    "model": "Desktop Client"
+  }
+}
+
+### Simpan token guru dari respons di atas
+@guruToken = {{loginGuru.response.body.accessToken}}
+
+### 4. Login Siswa
+# @name loginSiswa
+POST http://localhost:3000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "identifier": "SISWA001",
+  "password": "{{defaultPassword}}",
+  "device": {
+    "device_id": "review-pc-siswa",
+    "model": "Desktop Client"
+  }
+}
+
+### Simpan token siswa dari respons di atas
+@siswaToken = {{loginSiswa.response.body.accessToken}}
+
+### 5. Operator: Lihat Daftar Pengguna
+GET http://localhost:3000/api/v1/users
+Authorization: Bearer {{operatorToken}}
+
+### 6. Operator: Lihat Daftar Titik Lokasi Sekolah
+GET http://localhost:3000/api/v1/locations
+Authorization: Bearer {{operatorToken}}
+
+### 7. Operator: Lihat Daftar Jadwal
+GET http://localhost:3000/api/v1/schedules
+Authorization: Bearer {{operatorToken}}
+
+### 8. Guru: Lihat Jadwal Mengajar Pribadi
+GET http://localhost:3000/api/v1/me/schedules
+Authorization: Bearer {{guruToken}}
+
+### 9. Guru: Lihat Sesi Absensi
+GET http://localhost:3000/api/v1/sessions
+Authorization: Bearer {{guruToken}}
+
+### 10. Siswa: Lihat Jadwal Belajar Pribadi
+GET http://localhost:3000/api/v1/me/schedules
+Authorization: Bearer {{siswaToken}}

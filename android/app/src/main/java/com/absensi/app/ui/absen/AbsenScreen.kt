@@ -25,8 +25,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +42,7 @@ import androidx.compose.material.icons.filled.GpsOff
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
+import com.absensi.app.ui.common.AppTooltip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -386,18 +389,20 @@ private fun LocationOffContent(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                Button(
-                    onClick = onRetry,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(44.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.15f))
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Refresh, contentDescription = null, tint = Color.White)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Sudah Diaktifkan, Coba Lagi", color = Color.White)
+                AppTooltip(tooltip = "Periksa kembali status GPS dan muat ulang") {
+                    Button(
+                        onClick = onRetry,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.15f))
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Refresh, contentDescription = null, tint = Color.White)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Sudah Diaktifkan, Coba Lagi", color = Color.White)
+                        }
                     }
                 }
 
@@ -481,7 +486,8 @@ private fun CameraPreviewAndReadyContent(
                         colors = listOf(Color.Black.copy(alpha = 0.75f), Color.Transparent)
                     )
                 )
-                .padding(top = 40.dp, start = 16.dp, end = 16.dp, bottom = 20.dp)
+                .statusBarsPadding()
+                .padding(top = 12.dp, start = 16.dp, end = 16.dp, bottom = 20.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -490,15 +496,17 @@ private fun CameraPreviewAndReadyContent(
                 IconButton(
                     onClick = onNavigateBack,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
                         .background(Color.Black.copy(alpha = 0.4f))
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Kembali",
-                        tint = Color.White
-                    )
+                    AppTooltip(tooltip = "Kembali ke Beranda") {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = Color.White
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -519,35 +527,37 @@ private fun CameraPreviewAndReadyContent(
 
                 // Accuracy badge
                 val isAccurate = state.accuracy <= 50f
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            if (isAccurate) Color(0xFF10B981).copy(alpha = 0.25f)
-                            else Color(0xFFEF4444).copy(alpha = 0.25f)
-                        )
-                        .border(
-                            1.dp,
-                            if (isAccurate) Color(0xFF34D399).copy(alpha = 0.5f)
-                            else Color(0xFFEF4444).copy(alpha = 0.5f),
-                            RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.GpsFixed,
-                            contentDescription = null,
-                            tint = if (isAccurate) Color(0xFF34D399) else Color(0xFFEF4444),
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = String.format(Locale.US, "±%.1fm", state.accuracy),
-                            color = Color.White,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                AppTooltip(tooltip = if (isAccurate) "Sinyal GPS akurat (${String.format(Locale.US, "±%.1fm", state.accuracy)})" else "Sinyal GPS kurang akurat (> 50m)") {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                if (isAccurate) Color(0xFF10B981).copy(alpha = 0.25f)
+                                else Color(0xFFEF4444).copy(alpha = 0.25f)
+                            )
+                            .border(
+                                1.dp,
+                                if (isAccurate) Color(0xFF34D399).copy(alpha = 0.5f)
+                                else Color(0xFFEF4444).copy(alpha = 0.5f),
+                                RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.GpsFixed,
+                                contentDescription = null,
+                                tint = if (isAccurate) Color(0xFF34D399) else Color(0xFFEF4444),
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = String.format(Locale.US, "±%.1fm", state.accuracy),
+                                color = Color.White,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
                     }
                 }
             }
@@ -577,7 +587,8 @@ private fun CameraPreviewAndReadyContent(
                         colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f))
                     )
                 )
-                .padding(horizontal = 24.dp, vertical = 36.dp),
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -590,39 +601,41 @@ private fun CameraPreviewAndReadyContent(
             Spacer(modifier = Modifier.height(18.dp))
 
             // Shutter Button (NO GALLERY ACCESS BUTTON!)
-            Button(
-                onClick = {
-                    val executor = ContextCompat.getMainExecutor(context)
-                    imageCapture.takePicture(
-                        executor,
-                        object : ImageCapture.OnImageCapturedCallback() {
-                            override fun onCaptureSuccess(image: ImageProxy) {
-                                val bitmap = imageProxyToBitmap(image)
-                                image.close()
-                                if (bitmap != null) {
-                                    onCapture(bitmap)
+            AppTooltip(tooltip = "Ambil swafoto dan kirim presensi kehadiran") {
+                Button(
+                    onClick = {
+                        val executor = ContextCompat.getMainExecutor(context)
+                        imageCapture.takePicture(
+                            executor,
+                            object : ImageCapture.OnImageCapturedCallback() {
+                                override fun onCaptureSuccess(image: ImageProxy) {
+                                    val bitmap = imageProxyToBitmap(image)
+                                    image.close()
+                                    if (bitmap != null) {
+                                        onCapture(bitmap)
+                                    }
+                                }
+
+                                override fun onError(exception: ImageCaptureException) {
+                                    // Handled via viewModel
                                 }
                             }
-
-                            override fun onError(exception: ImageCaptureException) {
-                                // Handled via viewModel
-                            }
-                        }
+                        )
+                    },
+                    modifier = Modifier
+                        .size(76.dp)
+                        .clip(CircleShape)
+                        .border(4.dp, Color.White, CircleShape),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CameraAlt,
+                        contentDescription = "Ambil Swafoto",
+                        tint = Color.White,
+                        modifier = Modifier.size(36.dp)
                     )
-                },
-                modifier = Modifier
-                    .size(76.dp)
-                    .clip(CircleShape)
-                    .border(4.dp, Color.White, CircleShape),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = "Ambil Swafoto",
-                    tint = Color.White,
-                    modifier = Modifier.size(36.dp)
-                )
+                }
             }
         }
     }
@@ -872,18 +885,20 @@ private fun ErrorContent(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Button(
-                    onClick = onRetry,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Refresh, contentDescription = null, tint = Color.White)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Coba Lagi", color = Color.White, fontWeight = FontWeight.SemiBold)
+                AppTooltip(tooltip = "Coba lakukan presensi ulang") {
+                    Button(
+                        onClick = onRetry,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Refresh, contentDescription = null, tint = Color.White)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Coba Lagi", color = Color.White, fontWeight = FontWeight.SemiBold)
+                        }
                     }
                 }
 

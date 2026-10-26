@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -74,6 +76,7 @@ import androidx.compose.ui.unit.sp
 import com.absensi.app.data.remote.dto.LeaveRequestDto
 import com.absensi.app.ui.common.AppPaginationControl
 import com.absensi.app.ui.common.AppToastHost
+import com.absensi.app.ui.common.AppTooltip
 import com.absensi.app.ui.common.ToastMessage
 import com.absensi.app.ui.common.ToastType
 
@@ -136,6 +139,8 @@ fun SiswaLeaveScreen(
                     colors = listOf(Color(0xFF0F172A), Color(0xFF1E293B))
                 )
             )
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
@@ -152,16 +157,18 @@ fun SiswaLeaveScreen(
                 IconButton(
                     onClick = onNavigateBack,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.1f))
                         .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Kembali",
-                        tint = Color.White
-                    )
+                    AppTooltip(tooltip = "Kembali ke Dashboard") {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = Color.White
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
@@ -191,60 +198,64 @@ fun SiswaLeaveScreen(
                     .padding(4.dp)
             ) {
                 // Tab 0: Riwayat
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(
-                            if (uiState.activeTab == 0) Color.White.copy(alpha = 0.2f) else Color.Transparent
-                        )
-                        .clickable { viewModel.setTab(0) }
-                        .padding(vertical = 10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.History,
-                            contentDescription = null,
-                            tint = if (uiState.activeTab == 0) Color.White else Color(0xFF94A3B8),
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Riwayat",
-                            color = if (uiState.activeTab == 0) Color.White else Color(0xFF94A3B8),
-                            fontWeight = if (uiState.activeTab == 0) FontWeight.Bold else FontWeight.Normal,
-                            fontSize = 13.sp
-                        )
+                AppTooltip(tooltip = "Lihat riwayat pengajuan izin dan sakit") {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if (uiState.activeTab == 0) Color.White.copy(alpha = 0.2f) else Color.Transparent
+                            )
+                            .clickable { viewModel.setTab(0) }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.History,
+                                contentDescription = null,
+                                tint = if (uiState.activeTab == 0) Color.White else Color(0xFF94A3B8),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Riwayat",
+                                color = if (uiState.activeTab == 0) Color.White else Color(0xFF94A3B8),
+                                fontWeight = if (uiState.activeTab == 0) FontWeight.Bold else FontWeight.Normal,
+                                fontSize = 13.sp
+                            )
+                        }
                     }
                 }
 
                 // Tab 1: Ajukan Izin
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(
-                            if (uiState.activeTab == 1) Color.White.copy(alpha = 0.2f) else Color.Transparent
-                        )
-                        .clickable { viewModel.setTab(1) }
-                        .padding(vertical = 10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.AddCircleOutline,
-                            contentDescription = null,
-                            tint = if (uiState.activeTab == 1) Color.White else Color(0xFF94A3B8),
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Ajukan Izin",
-                            color = if (uiState.activeTab == 1) Color.White else Color(0xFF94A3B8),
-                            fontWeight = if (uiState.activeTab == 1) FontWeight.Bold else FontWeight.Normal,
-                            fontSize = 13.sp
-                        )
+                AppTooltip(tooltip = "Buka formulir pengajuan izin/sakit baru") {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if (uiState.activeTab == 1) Color.White.copy(alpha = 0.2f) else Color.Transparent
+                            )
+                            .clickable { viewModel.setTab(1) }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.AddCircleOutline,
+                                contentDescription = null,
+                                tint = if (uiState.activeTab == 1) Color.White else Color(0xFF94A3B8),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Ajukan Izin",
+                                color = if (uiState.activeTab == 1) Color.White else Color(0xFF94A3B8),
+                                fontWeight = if (uiState.activeTab == 1) FontWeight.Bold else FontWeight.Normal,
+                                fontSize = 13.sp
+                            )
+                        }
                     }
                 }
             }

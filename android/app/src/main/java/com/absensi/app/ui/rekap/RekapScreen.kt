@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -66,6 +68,7 @@ import androidx.core.content.FileProvider
 import com.absensi.app.data.remote.dto.AttendanceRecordDto
 import com.absensi.app.ui.common.AppPaginationControl
 import com.absensi.app.ui.common.AppToastHost
+import com.absensi.app.ui.common.AppTooltip
 import com.absensi.app.ui.common.ToastMessage
 import com.absensi.app.ui.common.ToastType
 
@@ -99,6 +102,8 @@ fun RekapScreen(
                     colors = listOf(Color(0xFF0F172A), Color(0xFF1E293B))
                 )
             )
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
@@ -115,16 +120,18 @@ fun RekapScreen(
                 IconButton(
                     onClick = onNavigateBack,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.1f))
                         .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Kembali",
-                        tint = Color.White
-                    )
+                    AppTooltip(tooltip = "Kembali ke Dashboard") {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = Color.White
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
@@ -387,59 +394,61 @@ fun RekapScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             // Download Excel Action Button
-            Button(
-                onClick = {
-                    viewModel.downloadExcelReport(context) { file ->
-                        try {
-                            val uri = FileProvider.getUriForFile(
-                                context,
-                                "${context.packageName}.provider",
-                                file
-                            )
-                            val intent = Intent(Intent.ACTION_VIEW).apply {
-                                setDataAndType(
-                                    uri,
-                                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            AppTooltip(tooltip = "Unduh dan buka berkas rekapitulasi presensi Excel (.xlsx)") {
+                Button(
+                    onClick = {
+                        viewModel.downloadExcelReport(context) { file ->
+                            try {
+                                val uri = FileProvider.getUriForFile(
+                                    context,
+                                    "${context.packageName}.provider",
+                                    file
                                 )
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                val intent = Intent(Intent.ACTION_VIEW).apply {
+                                    setDataAndType(
+                                        uri,
+                                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                    )
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(Intent.createChooser(intent, "Buka Berkas Excel"))
+                            } catch (_: Exception) {
+                                // File saved notification is already displayed by Toast
                             }
-                            context.startActivity(Intent.createChooser(intent, "Buka Berkas Excel"))
-                        } catch (_: Exception) {
-                            // File saved notification is already displayed by Toast
                         }
+                    },
+                    enabled = !uiState.isDownloading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp)
+                        .clip(RoundedCornerShape(14.dp)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF059669),
+                        disabledContainerColor = Color.White.copy(alpha = 0.1f)
+                    )
+                ) {
+                    if (uiState.isDownloading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(22.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Download,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Unduh Laporan Excel (.xlsx)",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        )
                     }
-                },
-                enabled = !uiState.isDownloading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .clip(RoundedCornerShape(14.dp)),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF059669),
-                    disabledContainerColor = Color.White.copy(alpha = 0.1f)
-                )
-            ) {
-                if (uiState.isDownloading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(22.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Download,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "Unduh Laporan Excel (.xlsx)",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
-                    )
                 }
             }
         }

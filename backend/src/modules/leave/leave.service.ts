@@ -228,6 +228,7 @@ export class LeaveService {
       pagination: {
         page,
         pageSize,
+        total,
         totalItems: total,
         totalPages: Math.ceil(total / pageSize) || 1,
       },

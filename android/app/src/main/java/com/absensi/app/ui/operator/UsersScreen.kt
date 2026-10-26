@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -65,6 +67,7 @@ import com.absensi.app.data.remote.dto.UserImportResponse
 import com.absensi.app.data.remote.dto.UserListItemDto
 import com.absensi.app.ui.common.AppPaginationControl
 import com.absensi.app.ui.common.AppToastHost
+import com.absensi.app.ui.common.AppTooltip
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -107,6 +110,8 @@ fun UsersScreen(
                     colors = listOf(Color(0xFF0F172A), Color(0xFF1E293B))
                 )
             )
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
@@ -121,15 +126,17 @@ fun UsersScreen(
                 IconButton(
                     onClick = onNavigateBack,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.1f))
+                        .background(Color.White.copy(alpha = 0.12f))
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Kembali",
-                        tint = Color.White
-                    )
+                    AppTooltip(tooltip = "Kembali ke Dashboard") {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = Color.White
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
@@ -140,18 +147,20 @@ fun UsersScreen(
                     fontSize = 20.sp
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                IconButton(
-                    onClick = { filePickerLauncher.launch("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF2563EB).copy(alpha = 0.3f))
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.UploadFile,
-                        contentDescription = "Impor Excel",
-                        tint = Color(0xFF60A5FA)
-                    )
+                AppTooltip(tooltip = "Impor data pengguna dari file Excel (.xlsx)") {
+                    IconButton(
+                        onClick = { filePickerLauncher.launch("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF2563EB).copy(alpha = 0.3f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.UploadFile,
+                            contentDescription = "Impor Excel",
+                            tint = Color(0xFF60A5FA)
+                        )
+                    }
                 }
             }
 
@@ -168,8 +177,10 @@ fun UsersScreen(
                 },
                 trailingIcon = {
                     if (uiState.searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
-                            Icon(imageVector = Icons.Default.Clear, contentDescription = "Hapus", tint = Color(0xFF94A3B8))
+                        AppTooltip(tooltip = "Hapus teks pencarian") {
+                            IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
+                                Icon(imageVector = Icons.Default.Clear, contentDescription = "Hapus", tint = Color(0xFF94A3B8))
+                            }
                         }
                     }
                 },
@@ -258,7 +269,9 @@ fun UsersScreen(
             contentColor = Color.White,
             shape = RoundedCornerShape(16.dp)
         ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Pengguna")
+            AppTooltip(tooltip = "Tambah Pengguna Baru") {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Pengguna")
+            }
         }
 
         // Custom Toast Host
@@ -384,18 +397,20 @@ fun UserCard(
                 }
             }
 
-            IconButton(
-                onClick = onResetPassword,
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.08f))
-            ) {
-                Icon(
-                    imageVector = Icons.Default.LockReset,
-                    contentDescription = "Reset Password",
-                    tint = Color(0xFFF59E0B)
-                )
+            AppTooltip(tooltip = "Reset password pengguna ini") {
+                IconButton(
+                    onClick = onResetPassword,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LockReset,
+                        contentDescription = "Reset Password",
+                        tint = Color(0xFFF59E0B)
+                    )
+                }
             }
         }
     }
@@ -592,8 +607,10 @@ fun ImportResultDialog(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Hasil Impor Excel", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
                 Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = onDismiss) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "Tutup", tint = Color(0xFF94A3B8))
+                AppTooltip(tooltip = "Tutup dialog") {
+                    IconButton(onClick = onDismiss) {
+                        Icon(imageVector = Icons.Default.Close, contentDescription = "Tutup", tint = Color(0xFF94A3B8))
+                    }
                 }
             }
 

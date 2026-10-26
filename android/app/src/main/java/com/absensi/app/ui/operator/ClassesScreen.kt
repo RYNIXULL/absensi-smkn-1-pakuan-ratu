@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -61,6 +63,7 @@ import com.absensi.app.data.remote.dto.ClassDto
 import com.absensi.app.ui.common.AppConfirmDialog
 import com.absensi.app.ui.common.AppPaginationControl
 import com.absensi.app.ui.common.AppToastHost
+import com.absensi.app.ui.common.AppTooltip
 
 @Composable
 fun ClassesScreen(
@@ -81,6 +84,8 @@ fun ClassesScreen(
                     colors = listOf(Color(0xFF0F172A), Color(0xFF1E293B))
                 )
             )
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
@@ -95,15 +100,17 @@ fun ClassesScreen(
                 IconButton(
                     onClick = onNavigateBack,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.1f))
+                        .background(Color.White.copy(alpha = 0.12f))
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Kembali",
-                        tint = Color.White
-                    )
+                    AppTooltip(tooltip = "Kembali ke Dashboard") {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = Color.White
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
@@ -128,8 +135,10 @@ fun ClassesScreen(
                 },
                 trailingIcon = {
                     if (uiState.searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
-                            Icon(imageVector = Icons.Default.Clear, contentDescription = "Hapus", tint = Color(0xFF94A3B8))
+                        AppTooltip(tooltip = "Hapus teks pencarian") {
+                            IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
+                                Icon(imageVector = Icons.Default.Clear, contentDescription = "Hapus", tint = Color(0xFF94A3B8))
+                            }
                         }
                     }
                 },
@@ -204,7 +213,9 @@ fun ClassesScreen(
             contentColor = Color.White,
             shape = RoundedCornerShape(16.dp)
         ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Kelas")
+            AppTooltip(tooltip = "Tambah Kelas Baru") {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Kelas")
+            }
         }
 
         // Toast Host
@@ -286,40 +297,46 @@ fun ClassItemCard(
                     Text(text = "Tahun Ajaran: ${classDto.tahun_ajaran}", color = Color(0xFF94A3B8), fontSize = 12.sp)
                 }
 
-                IconButton(onClick = onEdit) {
-                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = Color(0xFF94A3B8), modifier = Modifier.size(20.dp))
+                AppTooltip(tooltip = "Edit data kelas") {
+                    IconButton(onClick = onEdit) {
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = Color(0xFF94A3B8), modifier = Modifier.size(20.dp))
+                    }
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Hapus", tint = Color(0xFFEF4444), modifier = Modifier.size(20.dp))
+                AppTooltip(tooltip = "Hapus kelas ini") {
+                    IconButton(onClick = onDelete) {
+                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Hapus", tint = Color(0xFFEF4444), modifier = Modifier.size(20.dp))
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White.copy(alpha = 0.05f))
-                    .clickable(onClick = onManageMembers)
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(imageVector = Icons.Default.Group, contentDescription = null, tint = Color(0xFF34D399), modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "${classDto._count?.members ?: 0} Anggota terdaftar",
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = "Kelola Anggota",
-                    color = Color(0xFF38BDF8),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+            AppTooltip(tooltip = "Buka daftar anggota dan kelola siswa") {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .clickable(onClick = onManageMembers)
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(imageVector = Icons.Default.Group, contentDescription = null, tint = Color(0xFF34D399), modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "${classDto._count?.members ?: 0} Anggota terdaftar",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = "Kelola Anggota",
+                        color = Color(0xFF38BDF8),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }
@@ -492,8 +509,10 @@ fun ClassMembersManagerDialog(
                                     fontSize = 11.sp
                                 )
                             }
-                            IconButton(onClick = { onRemoveMember(member.user_id) }) {
-                                Icon(imageVector = Icons.Default.Delete, contentDescription = "Keluarkan", tint = Color(0xFFEF4444), modifier = Modifier.size(18.dp))
+                            AppTooltip(tooltip = "Keluarkan anggota dari kelas") {
+                                IconButton(onClick = { onRemoveMember(member.user_id) }) {
+                                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Keluarkan", tint = Color(0xFFEF4444), modifier = Modifier.size(18.dp))
+                                }
                             }
                         }
                     }
